@@ -2,6 +2,7 @@ package cloud.mallne.geokit.geojson.serialization
 
 import cloud.mallne.geokit.geojson.*
 import cloud.mallne.geokit.geojson.serialization.BoundingBoxSerializer.toJsonArray
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -14,7 +15,7 @@ import kotlinx.serialization.json.*
 
 @Suppress("LongMethod")
 object GeometrySerializer : KSerializer<Geometry> {
-    @OptIn(InternalSerializationApi::class)
+    @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor
         get() = buildSerialDescriptor("Geometry", PolymorphicKind.SEALED)
 

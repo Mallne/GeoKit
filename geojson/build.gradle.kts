@@ -30,6 +30,7 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.serialization.json)
                 api(libs.mlln.units)
+                api(project(":calculation"))
             }
         }
     }
