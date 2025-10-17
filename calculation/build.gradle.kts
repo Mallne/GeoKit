@@ -57,7 +57,7 @@ mavenPublishing {
                 version = project.version.toString()
 
                 pom {
-                    name = "DiCentra AreaAssist Shared"
+                    name = "GeoKit Calculation"
                     inceptionYear = "2025"
                     developers {
                         developer {

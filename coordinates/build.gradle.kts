@@ -58,7 +58,7 @@ mavenPublishing {
                 version = project.version.toString()
 
                 pom {
-                    name = "GeoKit GeoJSON"
+                    name = "GeoKit Coordinates"
                     inceptionYear = "2025"
                     developers {
                         developer {

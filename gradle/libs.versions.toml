@@ -25,6 +25,7 @@ mlln-units = "1.0.0-SNAPSHOT"
 postgres = "1.0.7.RELEASE"
 serialization = "1.9.0"
 version-catalog-update-v = "1.0.1"
+xmlutil = "0.91.2"
 
 [libraries]
 dc-areaassist-shared = { module = "cloud.mallne.dicentra.areaassist:shared", version.ref = "dc-areaassist" }
@@ -73,6 +74,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 mcp = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp" }
 mlln-units = { module = "cloud.mallne:units", version.ref = "mlln-units" }
 postgres = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgres" }
+xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

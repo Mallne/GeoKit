@@ -28,3 +28,5 @@ if (unitsDir.exists()) {
 
 include(":calculation")
 include(":geojson")
+include(":gml")
+include(":coordinates")

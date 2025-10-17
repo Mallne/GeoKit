@@ -1,0 +1,23 @@
+### WFS 2.0.0 GET Request (KVP BBOX Filter - OGC Compliant Y, X Order)
+@feature_type = ave:Flurstueck
+@version = 2.0.0
+@crs_urn = urn:ogc:def:crs:EPSG::4326
+@max_features = 100
+GET https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs?
+    SERVICE=WFS&
+    VERSION={{version}}&
+    REQUEST=GetFeature&
+    typeNames={{feature_type}}&
+    SRSName={{crs_urn}}&
+    bbox=11.0650,50.9590,11.0702,50.9526,{{crs_urn}}&
+    count={{max_features}}
+
+### WFS 2.0.0 GET Request (KVP BBOX Filter - OGC Compliant Y, X Order)
+GET https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs?
+    SERVICE=WFS&
+    VERSION={{version}}&
+    REQUEST=GetFeature&
+    typeNames={{feature_type}}&
+    SRSName={{crs_urn}}&
+    bbox=645021.4301836416,5647295.731612682,645406.5624732533,5646594.367474664&
+    count={{max_features}}

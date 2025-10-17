@@ -28,7 +28,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(libs.kotlinx.serialization.json)
+                api(libs.xmlutil.serialization)
                 api(libs.mlln.units)
                 api(project(":calculation"))
             }
@@ -58,7 +58,7 @@ mavenPublishing {
                 version = project.version.toString()
 
                 pom {
-                    name = "GeoKit GeoJSON"
+                    name = "GeoKit GML"
                     inceptionYear = "2025"
                     developers {
                         developer {
