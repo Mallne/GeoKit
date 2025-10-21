@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/../units" name="units">
+                <projects>
+                  <project path="$PROJECT_DIR$/../units" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="temurin-21" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/calculation" />
+            <option value="$PROJECT_DIR$/coordinates" />
+            <option value="$PROJECT_DIR$/geojson" />
+            <option value="$PROJECT_DIR$/gml" />
+            <option value="$PROJECT_DIR$/../units" />
+          </set>
+        </option>
       </GradleProjectSettings>
     </option>
   </component>
