@@ -87,7 +87,7 @@ second : number ;
 timeZone : utcTZ | localTZ ;
 
 utcTZ : UTC ;
-localTZ : (PLUS | MINUS) hour (MINUS minute)? ;
+localTZ : (PLUS | MINUS) hour (COLON minute)? ;
 
 // ----------------------------------------------------------------------
 // Extent Rules (Complex Optional Metadata)
@@ -98,10 +98,18 @@ scopeExtentIdentifierRemark: (COMMA usage)* (COMMA id)* (COMMA remark)?;
  * EXTENT structure can contain multiple specific extent definitions.
  */
 extent
-    : EXTENT delimiterOpen
-        (area | bbox | verticalExtent | temporalExtent)+
-        (COMMA id)?
-    delimiterClose
+    : area | bbox | verticalExtent | temporalExtent
+    | ( area COMMA bbox )
+    | ( area COMMA verticalExtent )
+    | ( area COMMA temporalExtent )
+    | ( bbox COMMA verticalExtent )
+    | ( bbox COMMA temporalExtent )
+    | ( verticalExtent COMMA temporalExtent )
+    | ( area COMMA bbox COMMA verticalExtent )
+    | ( area COMMA bbox COMMA temporalExtent )
+    | ( area COMMA verticalExtent COMMA temporalExtent )
+    | ( bbox COMMA verticalExtent COMMA temporalExtent )
+    | ( area COMMA bbox COMMA verticalExtent COMMA temporalExtent )
     ;
 
 /**
@@ -556,7 +564,7 @@ compoundCrs
     scopeExtentIdentifierRemark delimiterClose
     ;
 singleCrs
-    :geodeticCrs
+    : geodeticCrs
     | derivedGeodeticCrs
     | projectedCrs
     | derivedProjectedCrs
@@ -654,10 +662,12 @@ concatenatedOperation
     : CONCATENATEDOPERATION delimiterOpen quotedText
     ( COMMA operationVersion )?
     COMMA sourceCrs COMMA targetCrs
-    ( COMMA STEP delimiterOpen ( coordinateOperation | pmo | mapProjection | derivingConversion ) delimiterClose )+
+    ( COMMA step )+
     ( COMMA operationAccuracy )?
     scopeExtentIdentifierRemark delimiterClose
     ;
+
+step : STEP delimiterOpen ( coordinateOperation | pmo | mapProjection | derivingConversion ) delimiterClose;
 
 // ----------------------------------------------------------------------
 // Bound CRS

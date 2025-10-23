@@ -8,4 +8,4 @@ data class StaticGeodeticCrs(
     override val usages: List<Usage> = listOf(),
     override val identifiers: List<Identifier> = listOf(),
     override val remark: String? = null,
-) : GeodeticCoordinateReferenceSystem, StaticCoordinateReferenceSystem, ScopeExtentIdentifierRemark
+) : GeodeticCoordinateReferenceSystem, StaticCoordinateReferenceSystem, StaticCrsCoordinateMetadata

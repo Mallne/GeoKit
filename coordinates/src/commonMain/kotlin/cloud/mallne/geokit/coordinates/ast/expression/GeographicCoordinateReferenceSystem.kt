@@ -1,3 +1,3 @@
 package cloud.mallne.geokit.coordinates.ast.expression
 
-sealed interface GeographicCoordinateReferenceSystem : CoordinateReferenceSystem, GeodeticCoordinateReferenceSystem
+sealed interface GeographicCoordinateReferenceSystem : GeodeticCoordinateReferenceSystem

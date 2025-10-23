@@ -1,10 +1,13 @@
 package cloud.mallne.geokit.coordinates.ast.expression
 
-data class BoundCrs(
+data class ConcatenatedOperation(
+    val name: String,
+    val version: String? = null,
     val source: CoordinateReferenceSystem,
     val target: CoordinateReferenceSystem,
-    val abridgedCoordinateTransformation: AbridgedCoordinateTransformation,
+    val steps: List<SteppedOperation>,
+    val accuracy: Double? = null,
     override val usages: List<Usage> = emptyList(),
     override val identifiers: List<Identifier> = emptyList(),
     override val remark: String? = null,
-) : AbstractCoordinateReferenceSystem
+) : WKTCRSExpression, ScopeExtentIdentifierRemark

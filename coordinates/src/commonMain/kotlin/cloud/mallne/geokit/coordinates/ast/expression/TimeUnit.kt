@@ -4,4 +4,4 @@ data class TimeUnit(
     override val unitName: String,
     override val conversionFactor: Double,
     override val identifiers: List<Identifier> = listOf(),
-) : WKTUnit
+) : WKTUnit, ParameterUnit

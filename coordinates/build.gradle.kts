@@ -36,6 +36,7 @@ kotlin {
                 api(libs.kotlinx.serialization.json)
                 implementation(libs.antlr.runtime)
                 api(libs.mlln.units)
+                implementation(libs.kotlinx.datetime)
                 api(project(":calculation"))
             }
         }
