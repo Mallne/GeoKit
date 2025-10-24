@@ -15,7 +15,7 @@ options {
  * comprehensive datasets like EPSG.
  */
 wktCRS
-    : (boundCrs
+    :(boundCrs
     | compoundCrs
     | engineeringCrs
     | geodeticCrs
