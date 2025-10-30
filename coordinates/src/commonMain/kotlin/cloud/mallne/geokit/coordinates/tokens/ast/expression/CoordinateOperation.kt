@@ -14,4 +14,5 @@ data class CoordinateOperation(
     override val remark: String? = null,
 ) : SteppedOperation,
     ScopeExtentIdentifierRemark,
-    RootNode
+    RootNode,
+    Operation

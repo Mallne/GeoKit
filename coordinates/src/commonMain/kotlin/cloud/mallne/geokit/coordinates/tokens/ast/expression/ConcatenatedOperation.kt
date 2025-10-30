@@ -12,4 +12,5 @@ data class ConcatenatedOperation(
     override val remark: String? = null,
 ) : WKTCRSExpression,
     ScopeExtentIdentifierRemark,
-    RootNode
+    RootNode,
+    Operation
