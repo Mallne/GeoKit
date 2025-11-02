@@ -7,14 +7,19 @@ import cloud.mallne.geokit.coordinates.execution.IdentityLocator.Companion.findP
 import cloud.mallne.geokit.coordinates.execution.MethodDispatcher
 import cloud.mallne.geokit.coordinates.model.AbstractCoordinate
 import cloud.mallne.geokit.coordinates.model.LocalCoordinate
-import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractOperationParameter
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractParameter
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.OperationParameter
 
-internal object EPSG1031: ExecutionDispatchMethod {
+internal object EPSG1031 : ExecutionDispatchMethod {
     override val commonNames: List<String> = listOf("Geocentric Translations (geog2D domain)")
     override val identity: String = "EPSG:1031"
-    override fun execute(coordinate: AbstractCoordinate, parameters: List<AbstractParameter>, context: GeokitCoordinateConversionContext, dispatcher: MethodDispatcher, reverse: Boolean): AbstractCoordinate {
+    override fun execute(
+        coordinate: AbstractCoordinate,
+        parameters: List<AbstractParameter>,
+        context: GeokitCoordinateConversionContext,
+        dispatcher: MethodDispatcher,
+        reverse: Boolean
+    ): AbstractCoordinate {
         fun Double.operation(d: Double): Double {
             return if (reverse) {
                 this - d
@@ -33,9 +38,9 @@ internal object EPSG1031: ExecutionDispatchMethod {
             "The parameters for the operation are missing."
         }
 
-        val x = coordinate.x.operation(xParam.value)
-        val y = coordinate.y.operation(yParam.value)
-        val z = coordinate.z!!.operation(zParam.value)
+        val x = coordinate.x.operation(xParam.convert())
+        val y = coordinate.y.operation(yParam.convert())
+        val z = coordinate.z!!.operation(zParam.convert())
 
         return LocalCoordinate(x, y, z)
     }

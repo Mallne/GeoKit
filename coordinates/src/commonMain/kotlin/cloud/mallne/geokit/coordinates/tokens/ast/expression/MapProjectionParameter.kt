@@ -5,4 +5,6 @@ data class MapProjectionParameter(
     val value: Double,
     val unit: MapProjectionParameterUnit? = null,
     override val identifiers: List<Identifier> = listOf(),
-) : AbstractParameter
+) : AbstractParameter {
+    fun convert(): Double = unit?.let { value * it.conversionFactor } ?: value
+}

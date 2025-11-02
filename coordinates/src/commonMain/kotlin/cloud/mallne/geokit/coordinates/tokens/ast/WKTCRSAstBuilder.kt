@@ -494,7 +494,7 @@ class WKTCRSAstBuilder :
     override fun visitBaseStaticGeographicCrs(ctx: WKTCRSParser.BaseStaticGeographicCrsContext) =
         BaseStaticGeographicCrs(
             name = ctx.quotedText().computed,
-            datumEnsemble = when {
+            constraints = when {
                 ctx.geodeticReferenceFrame() != null -> visitGeodeticReferenceFrame(ctx.geodeticReferenceFrame()!!)
                 ctx.geodeticDatumEnsemble() != null -> visitGeodeticDatumEnsemble(ctx.geodeticDatumEnsemble()!!)
                 else -> throw IllegalArgumentException("Geodetic Constraints is not defined")

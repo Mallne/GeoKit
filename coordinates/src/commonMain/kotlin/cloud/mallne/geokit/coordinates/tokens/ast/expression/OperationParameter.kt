@@ -5,4 +5,6 @@ data class OperationParameter(
     val value: Double,
     val unit: ParameterUnit,
     override val identifiers: List<Identifier> = listOf(),
-) : AbstractOperationParameter
+) : AbstractOperationParameter {
+    fun convert(): Double = unit.let { value * it.conversionFactor }
+}

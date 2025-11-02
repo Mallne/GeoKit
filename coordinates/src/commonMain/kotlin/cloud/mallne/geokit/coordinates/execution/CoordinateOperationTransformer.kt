@@ -15,7 +15,7 @@ data class CoordinateOperationTransformer(
             name = "ETRS89 / UTM zone 32N",
             base = BaseStaticGeographicCrs(
                 name = "ETRS89",
-                datumEnsemble = GeodeticDatumEnsemble(
+                constraints = GeodeticDatumEnsemble(
                     name = "European Terrestrial Reference System 1989 ensemble",
                     members = listOf(
                         DatumEnsembleMember(
@@ -403,7 +403,7 @@ data class CoordinateOperationTransformer(
             ),
             remark = null
         )
-        /*CoordinateOperation(
+        CoordinateOperation(
             name = "ETRS89 to WGS 84 (1)",
             version = "EPSG-eur",
             source = StaticGeographicCrs(
@@ -944,7 +944,6 @@ data class CoordinateOperationTransformer(
             ),
             remark = null
         )
-         */
         return input
     }
 }
