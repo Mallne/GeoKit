@@ -6,4 +6,6 @@ data class Identifier(
     val version: Literal? = null,
     val citation: String? = null,
     val uri: String? = null,
-) : WKTCRSExpression
+) : WKTCRSExpression {
+    val epsgId = if (authorityName.equals("EPSG", true)) {"${authorityName.uppercase()}:$uid"} else null
+}

@@ -1,3 +1,5 @@
 package cloud.mallne.geokit.coordinates.tokens.ast.expression
 
-sealed interface AbstractOperationParameter : WKTCRSExpression
+sealed interface AbstractOperationParameter : AbstractParameter {
+
+}

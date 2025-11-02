@@ -1,14 +1,14 @@
 package cloud.mallne.geokit.coordinates.tokens.ast.expression
 
 data class CoordinateOperation(
-    val name: String,
-    val version: String? = null,
-    val source: CoordinateReferenceSystem,
-    val target: CoordinateReferenceSystem,
+    override val name: String,
+    override val version: String? = null,
+    override val source: CoordinateReferenceSystem,
+    override val target: CoordinateReferenceSystem,
     val method: OperationMethod,
     val parameters: List<AbstractOperationParameter> = listOf(),
     val interpolation: CoordinateReferenceSystem? = null,
-    val accuracy: Double? = null,
+    override val accuracy: Double? = null,
     override val usages: List<Usage> = listOf(),
     override val identifiers: List<Identifier> = listOf(),
     override val remark: String? = null,

@@ -1,8 +1,8 @@
 package cloud.mallne.geokit.coordinates.tokens.ast.expression
 
 data class OperationParameter(
-    val name: String,
+    override val name: String,
     val value: Double,
     val unit: ParameterUnit,
-    val identifiers: List<Identifier> = listOf(),
+    override val identifiers: List<Identifier> = listOf(),
 ) : AbstractOperationParameter

@@ -1,10 +1,10 @@
 package cloud.mallne.geokit.coordinates.tokens.ast.expression
 
 data class GeodeticReferenceFrame(
-    val name: String,
-    val ellipsoid: Ellipsoid,
+    override val name: String,
+    override val ellipsoid: Ellipsoid,
     val anchor: String? = null,
     val anchorEpoch: Double? = null,
-    val identifiers: List<Identifier> = listOf(),
-    val primeMeridian: PrimeMeridian? = null,
+    override val identifiers: List<Identifier> = listOf(),
+    override val primeMeridian: PrimeMeridian? = null,
 ) : GeodeticConstraints

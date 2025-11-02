@@ -1,9 +1,10 @@
 package cloud.mallne.geokit.coordinates.model
 
-import cloud.mallne.geokit.Vertex
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.CoordinateReferenceSystem
 
 data class Coordinate(
-    val vertex: Vertex,
-    val system: CoordinateReferenceSystem,
-)
+    override val latitude: Double,
+    override val longitude: Double,
+    override val altitude: Double? = null,
+    val crs: CoordinateReferenceSystem,
+): AbstractCoordinate

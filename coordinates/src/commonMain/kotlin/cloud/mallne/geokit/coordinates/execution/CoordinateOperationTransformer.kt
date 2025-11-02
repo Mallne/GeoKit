@@ -1,16 +1,409 @@
 package cloud.mallne.geokit.coordinates.execution
 
-import cloud.mallne.geokit.Vertex
-import cloud.mallne.geokit.coordinates.model.Coordinate
+import cloud.mallne.geokit.coordinates.model.AbstractCoordinate
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.*
 
 data class CoordinateOperationTransformer(
     override val reversed: Boolean,
     override val operation: CoordinateOperation,
+    override val given: CoordinateReferenceSystem,
+    override val wanted: CoordinateReferenceSystem,
 ) : CoordinateOperationPipeline<CoordinateOperation> {
 
-    override fun execute(input: Vertex): Coordinate {
-        CoordinateOperation(
+    override fun execute(input: AbstractCoordinate): AbstractCoordinate {
+        ProjectedCrs(
+            name = "ETRS89 / UTM zone 32N",
+            base = BaseStaticGeographicCrs(
+                name = "ETRS89",
+                datumEnsemble = GeodeticDatumEnsemble(
+                    name = "European Terrestrial Reference System 1989 ensemble",
+                    members = listOf(
+                        DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1989",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1178,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1990",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1179,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1991",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1180,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1992",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1181,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1993",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1182,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1994",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1183,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1996",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1184,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 1997",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1185,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 2000",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1186,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 2005",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1204,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 2014",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1206,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ), DatumEnsembleMember(
+                            name = "European Terrestrial Reference Frame 2020",
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 1382,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        )
+                    ),
+                    ellipsoid = Ellipsoid(
+                        name = "GRS 1980",
+                        semiMajorAxis = 6378137.0,
+                        inverseFlattening = 298.257222101,
+                        unit = LengthUnit(
+                            unitName = metre,
+                            conversionFactor = 1.0,
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 9001,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ),
+                        identifiers = listOf(
+                            Identifier(
+                                authorityName = EPSG,
+                                uid = 7019,
+                                version = null,
+                                citation = null,
+                                uri = null
+                            )
+                        )
+                    ),
+                    accuracy = 0.1,
+                    identifiers = listOf(
+                        Identifier(
+                            authorityName = EPSG,
+                            uid = 6258,
+                            version = null,
+                            citation = null,
+                            uri = null
+                        )
+                    ),
+                    primeMeridian = null
+                ),
+                unit = null,
+                identifiers = listOf(
+                    Identifier(
+                        authorityName = EPSG,
+                        uid = 4258,
+                        version = null,
+                        citation = null,
+                        uri = null
+                    )
+                )
+            ),
+            projection = MapProjection(
+                name = "UTM zone 32 N",
+                projectionMethod = MapProjectionMethod(
+                    name = "Transverse Mercator",
+                    identifiers = listOf(
+                        Identifier(
+                            authorityName = EPSG,
+                            uid = 9807,
+                            version = null,
+                            citation = null,
+                            uri = null
+                        )
+                    )
+                ),
+                parameters = listOf(
+                    MapProjectionParameter(
+                        name = "Latitude of natural origin",
+                        value = 0.0,
+                        unit = AngleUnit(
+                            unitName = "degree",
+                            conversionFactor = 0.0174532925199433,
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 9102,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ),
+                        identifiers = listOf(
+                            Identifier(
+                                authorityName = EPSG,
+                                uid = 8801,
+                                version = null,
+                                citation = null,
+                                uri = null
+                            )
+                        )
+                    ), MapProjectionParameter(
+                        name = "Longitude of natural origin",
+                        value = 9.0,
+                        unit = AngleUnit(
+                            unitName = "degree",
+                            conversionFactor = 0.0174532925199433,
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 9102,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ),
+                        identifiers = listOf(
+                            Identifier(
+                                authorityName = EPSG,
+                                uid = 8802,
+                                version = null,
+                                citation = null,
+                                uri = null
+                            )
+                        )
+                    ), MapProjectionParameter(
+                        name = "Scale factor at natural origin",
+                        value = 0.9996,
+                        unit = ScaleUnit(
+                            unitName = unity,
+                            conversionFactor = 1.0,
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 9201,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ),
+                        identifiers = listOf(
+                            Identifier(
+                                authorityName = EPSG,
+                                uid = 8805,
+                                version = null,
+                                citation = null,
+                                uri = null
+                            )
+                        )
+                    ), MapProjectionParameter(
+                        name = "False easting",
+                        value = 500000.0,
+                        unit = LengthUnit(
+                            unitName = "metre",
+                            conversionFactor = 1.0,
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 9001,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ),
+                        identifiers = listOf(
+                            Identifier(
+                                authorityName = EPSG,
+                                uid = 8806,
+                                version = null,
+                                citation = null,
+                                uri = null
+                            )
+                        )
+                    ), MapProjectionParameter(
+                        name = "False northing",
+                        value = 0.0,
+                        unit = LengthUnit(
+                            unitName = "metre",
+                            conversionFactor = 1.0,
+                            identifiers = listOf(
+                                Identifier(
+                                    authorityName = EPSG,
+                                    uid = 9001,
+                                    version = null,
+                                    citation = null,
+                                    uri = null
+                                )
+                            )
+                        ),
+                        identifiers = listOf(
+                            Identifier(
+                                authorityName = EPSG,
+                                uid = 8807,
+                                version = null,
+                                citation = null,
+                                uri = null
+                            )
+                        )
+                    )
+                ),
+                identifiers = listOf(
+                    Identifier(
+                        authorityName = EPSG,
+                        uid = 16032,
+                        version = null,
+                        citation = null,
+                        uri = null
+                    )
+                )
+            ),
+            coordinateSystem = SpatialCS(
+                type = SpatialCSType.CARTESIAN,
+                dimension = Dimension.D2,
+                identifiers = listOf(
+                    Identifier(
+                        authorityName = EPSG,
+                        uid = 4400,
+                        version = null,
+                        citation = null,
+                        uri = null
+                    )
+                ),
+                spatialAxis = listOf(
+                    SpatialAxis(
+                        name = "Easting(E)",
+                        direction = AxisDirection.EAST,
+                        order = null,
+                        unit = null,
+                        range = null,
+                        identifiers = listOf()
+                    ), SpatialAxis(
+                        name = "Northing(N)",
+                        direction = AxisDirection.NORTH(meridian = null),
+                        order = null,
+                        unit = null,
+                        range = null,
+                        identifiers = listOf()
+                    )
+                ),
+                unit = LengthUnit(
+                    unitName = "metre",
+                    conversionFactor = 1.0,
+                    identifiers = listOf(
+                        Identifier(
+                            authorityName = EPSG,
+                            uid = 9001,
+                            version = null,
+                            citation = null,
+                            uri = null
+                        )
+                    )
+                )
+            ),
+            usages = listOf(),
+            identifiers = listOf(
+                Identifier(authorityName = EPSG, uid = 25832, version = null, citation = null, uri = null)
+            ),
+            remark = null
+        )
+        /*CoordinateOperation(
             name = "ETRS89 to WGS 84 (1)",
             version = "EPSG-eur",
             source = StaticGeographicCrs(
@@ -551,5 +944,7 @@ data class CoordinateOperationTransformer(
             ),
             remark = null
         )
+         */
+        return input
     }
 }
