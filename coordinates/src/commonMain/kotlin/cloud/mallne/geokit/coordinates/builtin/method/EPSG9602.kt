@@ -5,20 +5,13 @@ import cloud.mallne.geokit.coordinates.execution.GeokitCoordinateConversionConte
 import cloud.mallne.geokit.coordinates.execution.MethodDispatcher
 import cloud.mallne.geokit.coordinates.model.AbstractCoordinate
 import cloud.mallne.geokit.coordinates.model.LocalCoordinate
-import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractOperationParameter
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractParameter
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.GeodeticCoordinateReferenceSystem
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.hypot
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
-internal object EPSG9602: ExecutionDispatchMethod {
-    override val commonNames: List<String> = listOf("Geographic 3D to Geocentric", "Geocentric to Geographic 3D", "Geographic/Geocentric conversions")
+internal object EPSG9602 : ExecutionDispatchMethod {
+    override val commonNames: List<String> =
+        listOf("Geographic 3D to Geocentric", "Geocentric to Geographic 3D", "Geographic/Geocentric conversions")
     override val identity: String = "EPSG:9602"
 
     /**
@@ -37,11 +30,18 @@ internal object EPSG9602: ExecutionDispatchMethod {
      *
      * TODO handle the case for differing units and non Greenwich prime meridians
      */
-    override fun execute(coordinate: AbstractCoordinate, parameters: List<AbstractParameter>, context: GeokitCoordinateConversionContext, dispatcher: MethodDispatcher, reverse: Boolean): AbstractCoordinate {
+    override fun execute(
+        coordinate: AbstractCoordinate,
+        parameters: List<AbstractParameter>,
+        context: GeokitCoordinateConversionContext,
+        dispatcher: MethodDispatcher,
+        reverse: Boolean
+    ): AbstractCoordinate {
         require(coordinate.is3D()) {
             "Coordinate is not 3D. This Operation however requires a 3D coordinate."
         }
-        val coordinateSystem = if (!reverse) context.source as? GeodeticCoordinateReferenceSystem else context.target as? GeodeticCoordinateReferenceSystem
+        val coordinateSystem =
+            if (!reverse) context.source as? GeodeticCoordinateReferenceSystem else context.target as? GeodeticCoordinateReferenceSystem
         require(coordinateSystem != null) {
             "The coordinate system for the Operation has to be a GeodeticCoordinateReferenceSystem."
         }
@@ -57,9 +57,9 @@ internal object EPSG9602: ExecutionDispatchMethod {
         coordinate: AbstractCoordinate,
         coordinateSystem: GeodeticCoordinateReferenceSystem
     ): LocalCoordinate {
-        val phi = coordinate.latitude
-        val lambda = coordinate.longitude
-        val h = coordinate.altitude!!
+        val phi = coordinate.phi
+        val lambda = coordinate.lambda
+        val h = coordinate.h!!
 
         // Extract ellipsoid parameters
         val a = coordinateSystem.system.ellipsoid.semiMajorAxis
@@ -104,7 +104,7 @@ internal object EPSG9602: ExecutionDispatchMethod {
             return LocalCoordinate(phi, 0.0, h)
         }
 
-        val epsilon = e2 / (1-e2)
+        val epsilon = e2 / (1 - e2)
         // Calculate intermediate parametric latitude q
         val q = atan2(b * a, p * b)
         // Calculate components for the final latitude formula

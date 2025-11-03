@@ -11,4 +11,6 @@ data class DerivedProjectedCrs(
 ) : SingleCoordinateReferenceSystem,
     StaticCrsCoordinateMetadata,
     DynamicCrsCoordinateMetadata,
-    RootNode
+    RootNode {
+    override fun getDatumUnit(): WKTUnit? = (coordinateSystem as? SpatialCS)?.unit
+}

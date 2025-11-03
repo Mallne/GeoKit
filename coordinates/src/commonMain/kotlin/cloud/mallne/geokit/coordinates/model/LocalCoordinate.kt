@@ -2,7 +2,6 @@ package cloud.mallne.geokit.coordinates.model
 
 import cloud.mallne.geokit.coordinates.execution.CalculationExtensions.toDegrees
 import cloud.mallne.geokit.coordinates.execution.CalculationExtensions.toRadians
-import cloud.mallne.geokit.coordinates.tokens.ast.expression.CoordinateReferenceSystem
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.WKTUnit
 
 data class LocalCoordinate(
@@ -10,13 +9,6 @@ data class LocalCoordinate(
     override val longitude: Double,
     override val altitude: Double? = null
 ) : AbstractCoordinate {
-    fun toCoordinate(crs: CoordinateReferenceSystem) = Coordinate(
-        latitude = latitude,
-        longitude = longitude,
-        altitude = altitude,
-        crs = crs,
-    )
-
     override fun toDeg() = copy(
         latitude = latitude.toDegrees(),
         longitude = longitude.toDegrees(),

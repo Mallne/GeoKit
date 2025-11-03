@@ -9,4 +9,7 @@ data class CompoundCrs(
 ) : CoordinateReferenceSystem,
     StaticCrsCoordinateMetadata,
     DynamicCrsCoordinateMetadata,
-    RootNode
+    RootNode {
+    override fun getDatumUnit(): WKTUnit? = null
+
+}

@@ -5,6 +5,7 @@ import cloud.mallne.geokit.coordinates.execution.IdentityLocator.Companion.findB
 import cloud.mallne.geokit.coordinates.execution.IdentityLocator.Companion.findByName
 import cloud.mallne.geokit.coordinates.model.AbstractCoordinate
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractParameter
+import cloud.mallne.geokit.coordinates.tokens.ast.expression.MapProjectionMethod
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.OperationMethod
 
 data class MethodDispatcher(
@@ -14,6 +15,20 @@ data class MethodDispatcher(
 
     fun dispatch(
         method: OperationMethod,
+        coordinate: AbstractCoordinate,
+        parameters: List<AbstractParameter> = emptyList(),
+        reverse: Boolean = false
+    ): AbstractCoordinate {
+        val match = method.identifiers.find { it.epsgId != null }
+        return if (match != null) {
+            dispatchById(match.epsgId!!, coordinate, parameters, reverse)
+        } else {
+            dispatchByName(method.name, coordinate, parameters, reverse)
+        }
+    }
+
+    fun dispatch(
+        method: MapProjectionMethod,
         coordinate: AbstractCoordinate,
         parameters: List<AbstractParameter> = emptyList(),
         reverse: Boolean = false
@@ -60,8 +75,7 @@ data class MethodDispatcher(
     fun doDispatch(
         method: ExecutionDispatchMethod,
         coordinate: AbstractCoordinate,
-        parameters: List<AbstractParameter
-                > = emptyList(),
+        parameters: List<AbstractParameter> = emptyList(),
         reverse: Boolean = false
     ): AbstractCoordinate {
         return method.execute(coordinate, parameters, context, this, reverse)

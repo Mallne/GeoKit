@@ -10,4 +10,6 @@ data class StaticGeographicCrs(
     override val remark: String? = null,
 ) : GeographicCoordinateReferenceSystem,
     StaticCoordinateReferenceSystem,
-    StaticCrsCoordinateMetadata
+    StaticCrsCoordinateMetadata {
+    override fun getDatumUnit(): WKTUnit? = (coordinateSystem as? SpatialCS)?.unit
+}

@@ -1,13 +1,13 @@
 package cloud.mallne.geokit.coordinates.execution
 
-import cloud.mallne.geokit.coordinates.tokens.ast.expression.CoordinateReferenceSystem
-import cloud.mallne.geokit.coordinates.tokens.ast.expression.Operation
+import cloud.mallne.geokit.coordinates.tokens.ast.expression.SteppedOperation
+import cloud.mallne.geokit.coordinates.tokens.ast.expression.WKTCRSExpression
 import kotlin.uuid.ExperimentalUuidApi
 
 data class GeokitCoordinateConversionContext(
-    val operation: Operation,
-    var source: CoordinateReferenceSystem,
-    var target: CoordinateReferenceSystem,
+    val operation: SteppedOperation,
+    var source: WKTCRSExpression,
+    var target: WKTCRSExpression,
     private val logger: GeokitLogger? = null,
 ) {
     @OptIn(ExperimentalUuidApi::class)

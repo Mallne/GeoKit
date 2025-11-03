@@ -9,4 +9,6 @@ data class StaticVerticalCrs(
     override val identifiers: List<Identifier> = emptyList(),
     override val remark: String? = null,
 ) : VerticalCoordinateReferenceSystem,
-    StaticCrsCoordinateMetadata
+    StaticCrsCoordinateMetadata {
+    override fun getDatumUnit(): WKTUnit? = (coordinateSystem as? SpatialCS)?.unit
+}

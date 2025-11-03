@@ -13,6 +13,13 @@ sealed interface AbstractCoordinate {
     val y: Double get() = longitude
     val z: Double? get() = altitude
 
+    val phi: Double get() = latitude
+    val lambda: Double get() = longitude
+    val h: Double? get() = altitude
+
+    val northing: Double get() = latitude
+    val easting: Double get() = longitude
+
     fun toDeg(): AbstractCoordinate
     fun toRad(): AbstractCoordinate
     fun autoConvert(thisUnit: WKTUnit): AbstractCoordinate

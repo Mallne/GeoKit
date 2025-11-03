@@ -204,7 +204,7 @@ class WKTCRSAstBuilder :
                 name = ctx.quotedText().computed,
                 base = visitBaseTemporalCrs(ctx.baseTemporalCrs()),
                 derivingConversion = visitDerivingConversion(ctx.derivingConversion()),
-                cs = visitCs(ctx.cs()),
+                coordinateSystem = visitCs(ctx.cs()),
                 usages = proxy.usages,
                 identifiers = proxy.identifiers,
                 remark = proxy.remark
@@ -224,7 +224,7 @@ class WKTCRSAstBuilder :
                 name = ctx.quotedText().computed,
                 base = visitBaseParametricCrs(ctx.baseParametricCrs()),
                 derivingConversion = visitDerivingConversion(ctx.derivingConversion()),
-                cs = visitCs(ctx.cs()),
+                coordinateSystem = visitCs(ctx.cs()),
                 usages = proxy.usages,
                 identifiers = proxy.identifiers,
                 remark = proxy.remark
@@ -244,7 +244,7 @@ class WKTCRSAstBuilder :
                 name = ctx.quotedText().computed,
                 base = visitBaseEngeneeringCrs(ctx.baseEngeneeringCrs()),
                 derivingConversion = visitDerivingConversion(ctx.derivingConversion()),
-                cs = visitCs(ctx.cs()),
+                coordinateSystem = visitCs(ctx.cs()),
                 usages = proxy.usages,
                 identifiers = proxy.identifiers,
                 remark = proxy.remark

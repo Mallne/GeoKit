@@ -9,4 +9,6 @@ data class ParametricCrs(
     override val remark: String?
 ) : SingleCoordinateReferenceSystem,
     StaticCrsCoordinateMetadata,
-    RootNode
+    RootNode {
+    override fun getDatumUnit(): WKTUnit? = (coordinateSystem as? SpatialCS)?.unit
+}

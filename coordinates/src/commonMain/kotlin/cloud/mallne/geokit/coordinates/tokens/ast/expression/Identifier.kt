@@ -7,5 +7,16 @@ data class Identifier(
     val citation: String? = null,
     val uri: String? = null,
 ) : WKTCRSExpression {
-    val epsgId = if (authorityName.equals("EPSG", true)) {"${authorityName.uppercase()}:$uid"} else null
+    val epsgId = "${authorityName}:$uid"
+
+    companion object {
+        val List<Identifier>.epsgId: String?
+            get() {
+                return if (size == 1) {
+                    first().epsgId
+                } else {
+                    null
+                }
+            }
+    }
 }

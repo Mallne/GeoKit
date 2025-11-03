@@ -9,4 +9,6 @@ data class StaticDerivedGeodeticCrs(
     override val identifiers: List<Identifier> = listOf(),
     override val remark: String? = null,
 ) : DerivedGeodeticCoordinateReferenceSystem,
-    StaticCoordinateReferenceSystem
+    StaticCoordinateReferenceSystem {
+    override fun getDatumUnit(): WKTUnit? = (coordinateSystem as? SpatialCS)?.unit
+}
