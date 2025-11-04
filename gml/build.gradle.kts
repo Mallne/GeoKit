@@ -33,6 +33,12 @@ kotlin {
                 api(project(":calculation"))
             }
         }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
     }
     jvmToolchain(21)
 }

@@ -1,5 +1,6 @@
 package cloud.mallne.geokit.coordinates.model
 
+import cloud.mallne.geokit.Vertex
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.WKTUnit
 
 sealed interface AbstractCoordinate {
@@ -23,4 +24,8 @@ sealed interface AbstractCoordinate {
     fun toDeg(): AbstractCoordinate
     fun toRad(): AbstractCoordinate
     fun autoConvert(thisUnit: WKTUnit): AbstractCoordinate
+
+
+    fun toVertex() = Vertex(latitude, longitude)
+    fun Vertex.toCoordinate() = LocalCoordinate(latitude, longitude)
 }

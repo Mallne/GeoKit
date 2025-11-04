@@ -1,8 +1,10 @@
 package cloud.mallne.geokit.gml
 
 import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.dom2.Element
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import nl.adaptivity.xmlutil.serialization.XmlValue
 
 /**
  * Generic GML Feature base type (whitewall: no domain-specific fields).
@@ -30,23 +32,34 @@ open class FeatureType(
 )
 
 /** A lightweight member wrapper that may appear in collections. */
-@XmlSerialName("featureMember", GmlNamespaces.GML, "gml")
+@XmlSerialName("member", GmlNamespaces.WFS, "wfs")
 @Serializable
-data class FeatureMember<T : FeatureType>(
-    @XmlElement(true)
-    val feature: T
+data class FeatureMember(
+    /** Raw XML content of the feature element (unknown domain). */
+    @XmlValue(true)
+    val content: Element? = null
 )
 
-/** GML 3.2 FeatureCollection equivalent kept generic. */
-@XmlSerialName("FeatureCollection", GmlNamespaces.GML, "gml")
+/** Wrapper for wfs:boundedBy that contains a gml:Envelope. */
+@XmlSerialName("boundedBy", GmlNamespaces.WFS, "wfs")
 @Serializable
-data class FeatureCollection<T : FeatureType>(
+data class WfsBoundedBy(
+    @XmlSerialName("Envelope", GmlNamespaces.GML, "gml")
+    @XmlElement(true)
+    val envelope: Envelope? = null
+)
+
+/** WFS 2.0 FeatureCollection focusing on collection metadata and bounds. */
+@XmlSerialName("FeatureCollection", GmlNamespaces.WFS, "wfs")
+@Serializable
+data class FeatureCollection(
     val id: String? = null,
     val timeStamp: String? = null,
     val numberMatched: Long? = null,
     val numberReturned: Long? = null,
     @XmlElement(true)
-    val boundedBy: Envelope? = null,
+    val boundedBy: WfsBoundedBy? = null,
+    @XmlSerialName("member", GmlNamespaces.WFS, "wfs")
     @XmlElement(true)
-    val members: List<FeatureMember<T>> = emptyList()
+    val members: List<FeatureMember> = emptyList()
 )

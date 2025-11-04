@@ -92,13 +92,30 @@ data class MultiPolygon(
     override val srsName: String? = null
 ) : Geometry
 
+/** Text-only corner elements and Envelope wrapper. */
+@XmlSerialName("lowerCorner", GmlNamespaces.GML, "gml")
+@Serializable
+data class LowerCorner(
+    @XmlValue
+    @Serializable(with = SpaceSeparatedDoublesSerializer::class)
+    val values: List<Double>
+)
+
+@XmlSerialName("upperCorner", GmlNamespaces.GML, "gml")
+@Serializable
+data class UpperCorner(
+    @XmlValue
+    @Serializable(with = SpaceSeparatedDoublesSerializer::class)
+    val values: List<Double>
+)
+
 /** Bounding box envelope using 2 corner positions. */
 @XmlSerialName("Envelope", GmlNamespaces.GML, "gml")
 @Serializable
 data class Envelope(
     @XmlElement(true)
-    val lowerCorner: Pos,
+    val lowerCorner: LowerCorner,
     @XmlElement(true)
-    val upperCorner: Pos,
+    val upperCorner: UpperCorner,
     override val srsName: String? = null
 ) : Geometry
