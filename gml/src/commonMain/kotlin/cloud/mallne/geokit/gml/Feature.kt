@@ -1,7 +1,11 @@
 package cloud.mallne.geokit.gml
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.dom2.Element
+import nl.adaptivity.xmlutil.dom2.localName
+import nl.adaptivity.xmlutil.dom2.prefix
+import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
@@ -38,7 +42,19 @@ data class FeatureMember(
     /** Raw XML content of the feature element (unknown domain). */
     @XmlValue(true)
     val content: Element? = null
-)
+) {
+    fun properties(nameSpace: String): Map<String, String> {
+        val elements =
+            content?.getChildNodes()?.filter { it is Element }?.filter { (it as Element).prefix == nameSpace }
+        return elements?.associate { (it as Element).localName to (it.getTextContent() ?: "") } ?: emptyMap()
+    }
+
+    fun geometry(prefix: String, localPart: String): Geometry? {
+        val geomElement = content?.getElementsByTagName("$prefix:$localPart")
+        val geomNode = geomElement?.firstOrNull() as? Element
+        return geomNode?.getTextContent()?.let { XML().decodeFromString<Geometry>(it) }
+    }
+}
 
 /** Wrapper for wfs:boundedBy that contains a gml:Envelope. */
 @XmlSerialName("boundedBy", GmlNamespaces.WFS, "wfs")

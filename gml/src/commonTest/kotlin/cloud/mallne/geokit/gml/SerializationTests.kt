@@ -25,7 +25,11 @@ class SerializationTests {
         val source = stripXmlProlog(ParserTest.GPRXY)
         val objs = xml.decodeFromString<FeatureCollection>(source)
         assertTrue(objs.members.isNotEmpty(), "Expected at least one member")
-        val node = objs.members.first().content
+        val node = objs.members.first()
+        val properties = node.properties("ave")
+        val geometry = node.geometry("ave", "geometrie")
         println(node)
+        println(geometry)
+        println(properties)
     }
 }
