@@ -25,7 +25,9 @@ sealed interface AbstractCoordinate {
     fun toRad(): AbstractCoordinate
     fun autoConvert(thisUnit: WKTUnit): AbstractCoordinate
 
-
     fun toVertex() = Vertex(latitude, longitude)
-    fun Vertex.toCoordinate() = LocalCoordinate(latitude, longitude)
+
+    companion object {
+        fun Vertex.toCoordinate() = LocalCoordinate(latitude, longitude)
+    }
 }

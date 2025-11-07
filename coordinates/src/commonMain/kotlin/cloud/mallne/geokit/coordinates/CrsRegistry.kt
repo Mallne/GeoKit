@@ -15,6 +15,7 @@ data class CrsRegistry(
     val operations: MutableList<Operation> = mutableListOf(),
     val methods: MutableList<ExecutionDispatchMethod> = CommonExecutionMethods.entries.toMutableList(),
     val logger: GeokitLogger? = null,
+    private val cachedPipelines: MutableMap<SearchContainer, Pipeline<AbstractCoordinate, AbstractCoordinate>>
 ) {
     fun ingest(wktCrs: String) {
         when (val node = WktCrsParser(wktCrs)) {
@@ -24,11 +25,26 @@ data class CrsRegistry(
         }
     }
 
+    fun clearCaches() {
+        cachedPipelines.clear()
+    }
+
     fun compose(
         source: AbstractCoordinate,
         fromEPSG: String,
         toEPSG: String,
     ): PipelineContainer<AbstractCoordinate, AbstractCoordinate> {
+        val cached = cachedPipelines.firstNotNullOfOrNull { (pair, pipeline) ->
+            if (pair.from.samePointer(fromEPSG) && pair.to.samePointer(toEPSG)) {
+                pair to pipeline
+            } else null
+        }
+        if (cached != null) {
+            //Premature exit condition for cached Pipelines
+            return PipelineContainer(cached.first.from.getDatumUnit()?.let { source.autoConvert(it) } ?: source.toRad(),
+                cached.second)
+        }
+
         val search = search(fromEPSG, toEPSG)
         val pipelines = mutableListOf<Pipeline<AbstractCoordinate, AbstractCoordinate>>()
 
@@ -105,8 +121,12 @@ data class CrsRegistry(
             }
         }
 
-        return PipelineContainer(search.from.getDatumUnit()?.let { source.autoConvert(it) } ?: source.toRad(),
-            MultiPipeline(pipelines) { it })
+        val mulPipeline = MultiPipeline(pipelines) { it }
+        cachedPipelines[search] = mulPipeline
+        return PipelineContainer(
+            data = search.from.getDatumUnit()?.let { source.autoConvert(it) } ?: source.toRad(),
+            pipeline = mulPipeline
+        )
     }
 
     private fun search(fromEPSG: String, toEPSG: String): SearchContainer {
@@ -197,15 +217,19 @@ data class CrsRegistry(
         return this.identifiers.map { CRSPointer(it.epsgId) } + add
     }
 
+    private fun CoordinateReferenceSystem.samePointer(epsgCode: String): Boolean {
+        return this.identifiers.any { it.epsgId.contains(epsgCode, true) }
+    }
+
     data class CRSPointer(
         val id: String,
         val isBaseOf: String? = null,
     )
 
     private fun findInRepo(epsgCode: String): CoordinateReferenceSystem? =
-        (crs.find { it.identifiers.any { it.epsgId.contains(epsgCode, true) } }
-            ?: operations.find { it.source.identifiers.any { it.epsgId.contains(epsgCode, true) } }?.source
-            ?: operations.find { it.target.identifiers.any { it.epsgId.contains(epsgCode, true) } }?.target)
+        (crs.find { it.samePointer(epsgCode) }
+            ?: operations.find { it.source.samePointer(epsgCode) }?.source
+            ?: operations.find { it.target.samePointer(epsgCode) }?.target)
 
     data class SearchContainer(
         val operation: Operation?,
