@@ -28,7 +28,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(libs.kotlinx.serialization.json)
                 api(libs.xmlutil.serialization)
+                api(libs.xmlutil.serialization.core)
                 api(libs.mlln.units)
                 api(project(":calculation"))
             }

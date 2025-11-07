@@ -27,7 +27,9 @@ object SpaceSeparatedDoublesSerializer : KSerializer<List<Double>> {
     override fun deserialize(decoder: Decoder): List<Double> {
         val s = decoder.decodeString()
         if (s.isBlank()) return emptyList()
-        return s.split(Regex("\\s+")).map { it.toDouble() }
+        val ss = s.split(Regex("\\s+"))
+        val sss = ss.mapNotNull { it.toDoubleOrNull() }
+        return sss
     }
 }
 
