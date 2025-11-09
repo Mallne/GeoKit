@@ -34,6 +34,13 @@ data class CrsRegistry(
         fromEPSG: String,
         toEPSG: String,
     ): PipelineContainer<AbstractCoordinate, AbstractCoordinate> {
+        //check if the from and to are the same to skip entire checks
+        if (fromEPSG.equals(toEPSG, true)) {
+            return PipelineContainer(source, object : Pipeline<AbstractCoordinate, AbstractCoordinate> {
+                override fun execute(input: AbstractCoordinate) = input
+            })
+        }
+
         val cached = cachedPipelines.firstNotNullOfOrNull { (pair, pipeline) ->
             if (pair.from.samePointer(fromEPSG) && pair.to.samePointer(toEPSG)) {
                 pair to pipeline

@@ -28,8 +28,7 @@ data class GetFeature(
             count: Int? = null,
             startIndex: Int? = null,
             valueReference: String = "*"
-        ):
-                GetFeature {
+        ): GetFeature {
             val q = Query(typeNames = typeNames, srsName = srsName, filter = Filter(BBOX(valueReference, envelope)))
             return GetFeature(queries = listOf(q), count = count, startIndex = startIndex)
         }
