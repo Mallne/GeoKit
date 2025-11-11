@@ -161,3 +161,5 @@ constructor(
             properties?.get(key)?.let { Json.decodeFromJsonElement(it) }
     }
 }
+
+typealias JsonFeature = Feature<Geometry?, JsonObject?>

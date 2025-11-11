@@ -18,12 +18,12 @@ object WfsExtensions {
     fun BoundingBox.toGmlBoundedBy(): WfsBoundedBy = this.toBoundary().toGmlBoundedBy()
     fun WfsBoundedBy.toGeoJson(): BoundingBox? = this.toBoundary()?.toBoundingBox()
 
-    fun FeatureMember.toGeoJson(prefix: String, geometryLocalPart: String, xml: XML = XML()): Feature = Feature(
+    fun FeatureMember.toGeoJson(prefix: String, geometryLocalPart: String, xml: XML = XML()) = Feature(
         geometry = this.geometry(prefix, geometryLocalPart, xml)?.toGeoJson(),
         properties = this.properties(prefix).map { it.key to JsonPrimitive(it.value) }.toMap(),
     )
 
-    fun WfsFeatureCollection.toGeoJson(prefix: String, geometryLocalPart: String, xml: XML = XML()): FeatureCollection =
+    fun WfsFeatureCollection.toGeoJson(prefix: String, geometryLocalPart: String, xml: XML = XML()) =
         FeatureCollection(
             bbox = this.boundedBy?.toGeoJson(),
             features = members.map { it.toGeoJson(prefix, geometryLocalPart, xml) }

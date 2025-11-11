@@ -19,7 +19,7 @@ import cloud.mallne.geokit.gml.model.geometry.Polygon as GmlPolygon
 
 object GmlGeometryExtensions {
     fun Geometry.toGml(): GmlGeometry = when (this) {
-        is GeometryCollection -> this.toGml()
+        is GeometryCollection<*> -> this.toGml()
         is LineString -> this.toGml()
         is MultiLineString -> this.toGml()
         is MultiPoint -> this.toGml()
@@ -38,10 +38,10 @@ object GmlGeometryExtensions {
         is GmlPolygon -> this.toGeoJson()
     }
 
-    fun GeometryCollection.toGml(): MultiSurface =
+    fun GeometryCollection<*>.toGml(): MultiSurface =
         MultiSurface(surfaceMembers = this.geometries.map { SurfaceMember(it.toGml()) })
 
-    fun MultiSurface.toGeoJson(): GeometryCollection =
+    fun MultiSurface.toGeoJson(): GeometryCollection<Geometry> =
         GeometryCollection(geometries = this.surfaceMembers.map { it.geometry.toGeoJson() })
 
     fun LineString.toGml(): GmlLineString = GmlLineString(posList = this.coordinates.toGml())

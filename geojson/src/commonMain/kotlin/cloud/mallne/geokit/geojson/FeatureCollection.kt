@@ -106,3 +106,5 @@ constructor(
             )
     }
 }
+
+typealias JsonFeatureCollection = FeatureCollection<Geometry?, JsonObject?>
