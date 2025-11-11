@@ -1,6 +1,6 @@
 package cloud.mallne.geokit.coordinates.tokens.ast.expression
 
-sealed interface Operation : WKTCRSExpression {
+sealed interface Operation : ScopeExtentIdentifierRemark {
     val name: String
     val version: String?
     val source: CoordinateReferenceSystem

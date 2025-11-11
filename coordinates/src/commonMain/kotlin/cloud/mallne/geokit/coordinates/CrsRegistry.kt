@@ -15,8 +15,19 @@ data class CrsRegistry(
     val operations: MutableList<Operation> = mutableListOf(),
     val methods: MutableList<ExecutionDispatchMethod> = CommonExecutionMethods.entries.toMutableList(),
     val logger: GeokitLogger? = null,
-    private val cachedPipelines: MutableMap<SearchContainer, Pipeline<AbstractCoordinate, AbstractCoordinate>>
+    private val cachedPipelines: MutableMap<SearchContainer, Pipeline<AbstractCoordinate, AbstractCoordinate>> = mutableMapOf(),
 ) {
+    fun understands(string: String): Boolean {
+        return crs.any { coordinateReferenceSystem ->
+            coordinateReferenceSystem.identifiers.any {
+                it.epsgId.contains(
+                    string
+                )
+            }
+        }
+                || operations.any { operation -> operation.identifiers.any { it.epsgId.contains(string) } }
+    }
+
     fun ingest(wktCrs: String) {
         when (val node = WktCrsParser(wktCrs)) {
             is CoordinateReferenceSystem -> crs.add(node)
