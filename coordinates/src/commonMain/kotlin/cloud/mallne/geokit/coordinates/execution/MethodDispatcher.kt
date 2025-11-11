@@ -19,9 +19,9 @@ data class MethodDispatcher(
         parameters: List<AbstractParameter> = emptyList(),
         reverse: Boolean = false
     ): AbstractCoordinate {
-        val match = method.identifiers.find { it.epsgId != null }
+        val match = method.identifiers.firstOrNull()
         return if (match != null) {
-            dispatchById(match.epsgId!!, coordinate, parameters, reverse)
+            dispatchById(match.epsgId, coordinate, parameters, reverse)
         } else {
             dispatchByName(method.name, coordinate, parameters, reverse)
         }
@@ -33,9 +33,9 @@ data class MethodDispatcher(
         parameters: List<AbstractParameter> = emptyList(),
         reverse: Boolean = false
     ): AbstractCoordinate {
-        val match = method.identifiers.find { it.epsgId != null }
+        val match = method.identifiers.firstOrNull()
         return if (match != null) {
-            dispatchById(match.epsgId!!, coordinate, parameters, reverse)
+            dispatchById(match.epsgId, coordinate, parameters, reverse)
         } else {
             dispatchByName(method.name, coordinate, parameters, reverse)
         }

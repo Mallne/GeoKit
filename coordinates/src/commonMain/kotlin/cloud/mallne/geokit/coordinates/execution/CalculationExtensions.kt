@@ -1,5 +1,6 @@
 package cloud.mallne.geokit.coordinates.execution
 
+import kotlin.jvm.JvmName
 import kotlin.math.PI
 import kotlin.math.abs
 
@@ -28,6 +29,7 @@ internal object CalculationExtensions {
         return radians * PI / 180
     }
 
+    @JvmName("approximateTo")
     infix fun Double.`~`(other: Double): Boolean {
         return this approx other
     }
