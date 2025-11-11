@@ -1,8 +1,8 @@
 package cloud.mallne.geokit.gml.model
 
 import cloud.mallne.geokit.Vertex
+import cloud.mallne.geokit.gml.Extensions.toVertex
 import cloud.mallne.geokit.gml.SpaceSeparatedDoublesSerializer
-import cloud.mallne.geokit.gml.model.CoordinateParser.toVertex
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import nl.adaptivity.xmlutil.serialization.XmlElement

@@ -1,5 +1,6 @@
 package cloud.mallne.geokit.gml.model.wfs
 
+import cloud.mallne.geokit.gml.Namespaces
 import cloud.mallne.geokit.gml.model.geometry.Geometry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,10 +10,11 @@ import nl.adaptivity.xmlutil.dom2.Element
 import nl.adaptivity.xmlutil.dom2.localName
 import nl.adaptivity.xmlutil.dom2.prefix
 import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
 
 /** A lightweight member wrapper that may appear in collections. */
-//@XmlSerialName("member", Namespaces.WFS, Namespaces.Prefix.WFS)
+@XmlSerialName("member", Namespaces.WFS, Namespaces.Prefix.WFS)
 @SerialName("member")
 @Serializable
 data class FeatureMember(
@@ -20,9 +22,9 @@ data class FeatureMember(
     @XmlValue(true)
     val content: Element? = null
 ) {
-    fun properties(nameSpace: String): Map<String, String> {
+    fun properties(prefix: String): Map<String, String> {
         val elements =
-            content?.getChildNodes()?.filter { it is Element }?.filter { (it as Element).prefix == nameSpace }
+            content?.getChildNodes()?.filter { it is Element }?.filter { (it as Element).prefix == prefix }
         return elements?.associate { (it as Element).localName to (it.getTextContent()?.trim() ?: "") } ?: emptyMap()
     }
 
