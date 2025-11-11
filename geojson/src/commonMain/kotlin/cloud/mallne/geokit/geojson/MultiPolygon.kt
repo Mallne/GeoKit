@@ -1,84 +1,138 @@
 package cloud.mallne.geokit.geojson
 
-import cloud.mallne.geokit.geojson.serialization.*
+import cloud.mallne.geokit.geojson.serialization.MultiPolygonSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.SerializationException
+import org.intellij.lang.annotations.Language
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-@Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
-@Serializable(with = GeometrySerializer::class)
-class MultiPolygon @JvmOverloads constructor(
+/**
+ * A [MultiPolygon] geometry represents multiple surfaces in coordinate space.
+ *
+ * See [RFC 7946 Section 3.1.7](https://tools.ietf.org/html/rfc7946#section-3.1.7) for the full
+ * specification.
+ *
+ * @throws IllegalArgumentException if any of the lists does not represent a valid [Polygon]
+ * @see Polygon
+ */
+@Serializable(with = MultiPolygonSerializer::class)
+data class MultiPolygon
+@JvmOverloads
+constructor(
+    /** The coordinates of this geometry. */
     val coordinates: List<List<List<Position>>>,
-    override val bbox: BoundingBox? = null
-) : Geometry() {
-    @JvmOverloads
-    constructor(vararg coordinates: List<List<Position>>, bbox: BoundingBox? = null) : this(
-        coordinates.toList(),
-        bbox
-    )
+    /** The bounding box of this geometry. */
+    override val bbox: BoundingBox? = null,
+) : MultiGeometry, PolygonGeometry, Collection<Polygon> {
 
+    /**
+     * Create a [MultiPolygon] by a number of lists (= polygon rings) of lists (= [Position]
+     * objects).
+     *
+     * @param coordinates The lists of polygon rings that make up the [Polygon] objects.
+     * @param bbox The [BoundingBox] of this geometry.
+     * @throws IllegalArgumentException if any list does not represent a valid [Polygon]
+     */
+    @JvmOverloads
+    constructor(
+        vararg coordinates: List<List<Position>>,
+        bbox: BoundingBox? = null,
+    ) : this(coordinates.toList(), bbox)
+
+    /**
+     * Create a [MultiPolygon] by a number of [Polygon] objects.
+     *
+     * @param polygons The [Polygon] objects that make up this multi-polygon.
+     * @param bbox The [BoundingBox] of this geometry.
+     * @throws IllegalArgumentException if any of the [Polygon] objects does not represent a valid
+     *   polygon (e.g., empty or rings not closed or fewer than 4 positions per ring).
+     */
+    @JvmOverloads
+    constructor(
+        vararg polygons: Polygon,
+        bbox: BoundingBox? = null,
+    ) : this(polygons.map { it.coordinates }, bbox)
+
+    /**
+     * Create a [MultiPolygon] by an array (= [Polygon] objects) of arrays (= polygon rings) of
+     * arrays (= [Position] objects) where each [Position] is represented by a [DoubleArray].
+     *
+     * @param coordinates The array of arrays of arrays of double arrays representing [Polygon]
+     *   objects.
+     * @param bbox The [BoundingBox] of this geometry.
+     * @throws IllegalArgumentException if the array does not represent a valid [MultiPolygon]
+     */
     @JvmOverloads
     constructor(
         coordinates: Array<Array<Array<DoubleArray>>>,
-        bbox: BoundingBox? = null
+        bbox: BoundingBox? = null,
     ) : this(coordinates.map { ring -> ring.map { it.map(::Position) } }, bbox)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
+    init {
+        coordinates.forEachIndexed { polygonIndex, polygon ->
+            require(polygon.isNotEmpty()) { "Polygon at index $polygonIndex must not be empty." }
 
-        other as MultiPolygon
-
-        if (coordinates != other.coordinates) return false
-        if (bbox != other.bbox) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = coordinates.hashCode()
-        result = 31 * result + (bbox?.hashCode() ?: 0)
-        return result
-    }
-
-    override fun json(): String =
-        """{"type":"MultiPolygon",${bbox.jsonProp()}"coordinates":${
-            coordinates.jsonJoin { polygon ->
-                polygon.jsonJoin {
-                    it.jsonJoin(transform = Position::json)
+            polygon.forEachIndexed { ringIndex, ring ->
+                require(ring.size >= 4) {
+                    "Line string at index $ringIndex of polygon at index $polygonIndex contains " +
+                            "fewer than 4 positions."
+                }
+                require(ring.first() == ring.last()) {
+                    "Line string at at index $ringIndex of polygon at index $polygonIndex is " +
+                            "not closed."
                 }
             }
-        }}"""
+        }
+    }
 
+    override val size: Int
+        get() = coordinates.size
+
+    override fun isEmpty(): Boolean = coordinates.isEmpty()
+
+    override fun contains(element: Polygon): Boolean = coordinates.contains(element.coordinates)
+
+    override fun iterator(): Iterator<Polygon> =
+        coordinates.asSequence().map { Polygon(it) }.iterator()
+
+    override fun containsAll(elements: Collection<Polygon>): Boolean =
+        coordinates.containsAll(elements.map { it.coordinates })
+
+    /**
+     * Get the polygon at the specified index.
+     *
+     * @param index The index of the polygon to retrieve.
+     * @return The polygon at the specified index.
+     */
+    operator fun get(index: Int): Polygon = Polygon(coordinates[index])
+
+    /** Factory methods for creating and serializing [MultiPolygon] objects. */
     companion object {
+        /**
+         * Deserialize a [MultiPolygon] from a JSON string.
+         *
+         * @param json The JSON string to parse.
+         * @return The deserialized [MultiPolygon].
+         * @throws SerializationException if the JSON string is invalid or cannot be deserialized.
+         * @throws IllegalArgumentException if the geometry does not meet structural requirements.
+         */
         @JvmStatic
-        fun fromJson(json: String): MultiPolygon =
-            fromJson(Json.decodeFromString(JsonObject.serializer(), json))
+        fun fromJson(@Language("json") json: String): MultiPolygon =
+            GeoJson.decodeFromString(json)
 
+        /**
+         * Deserialize a [MultiPolygon] from a JSON string, or null if parsing fails.
+         *
+         * @param json The JSON string to parse.
+         * @return The deserialized [MultiPolygon], or null if parsing fails.
+         */
         @JvmStatic
-        fun fromJsonOrNull(json: String): MultiPolygon? = try {
-            fromJson(json)
-        } catch (_: Exception) {
-            null
-        }
+        fun fromJsonOrNull(@Language("json") json: String): MultiPolygon? =
+            GeoJson.decodeFromStringOrNull(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: JsonObject): MultiPolygon {
-            require(json.getValue("type").jsonPrimitive.content == "MultiPolygon") {
-                "Object \"type\" is not \"MultiPolygon\"."
-            }
-
-            val coords =
-                json.getValue("coordinates").jsonArray.map { polygon ->
-                    polygon.jsonArray.map { ring -> ring.jsonArray.map { it.jsonArray.toPosition() } }
-                }
-            val bbox = json["bbox"]?.jsonArray?.toBbox()
-
-            return MultiPolygon(coords, bbox)
-        }
+        internal fun toJson(multiPolygon: MultiPolygon): String = multiPolygon.toJson()
     }
 }

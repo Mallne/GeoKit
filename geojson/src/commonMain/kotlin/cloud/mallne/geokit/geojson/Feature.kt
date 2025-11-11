@@ -1,142 +1,163 @@
 package cloud.mallne.geokit.geojson
 
 import cloud.mallne.geokit.geojson.serialization.FeatureSerializer
-import cloud.mallne.geokit.geojson.serialization.idProp
-import cloud.mallne.geokit.geojson.serialization.jsonProp
-import cloud.mallne.geokit.geojson.serialization.toBbox
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.*
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import org.intellij.lang.annotations.Language
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
+import kotlin.jvm.JvmSynthetic
 
 /**
- * A feature object represents a spatially bounded thing.
+ * A [Feature] object represents a spatially bounded thing.
  *
- * @see <a href="https://tools.ietf.org/html/rfc7946#section-3.2">https://tools.ietf.org/html/rfc7946#section-3.2</a>
+ * See [RFC 7946 Section 3.2](https://tools.ietf.org/html/rfc7946#section-3.2) for the full
+ * specification.
  *
- * @property geometry A [Geometry] object contained within the feature.
- * @property properties Additional properties about this feature.
- * When serialized, any non-simple types will be serialized into JSON objects.
- * @property id An optionally included string that commonly identifies this feature.
+ * @param G The type of [Geometry] contained in this [Feature].
+ * @param P The type of properties. This can be any type that serializes to a JSON object. For
+ *   dynamic or unknown property schemas, use [JsonObject]. For known schemas, use a [Serializable]
+ *   data class.
+ * @property geometry A [Geometry] object contained within the [Feature].
+ * @property properties Additional properties about this [Feature]. It should be serializable into a
+ *   [JsonObject].
+ * @property id An optionally included string or number that commonly identifies this [Feature].
+ * @see FeatureCollection
  */
-@Suppress("TooManyFunctions")
 @Serializable(with = FeatureSerializer::class)
-class Feature(
-    val geometry: Geometry?,
-    properties: Map<String, JsonElement> = emptyMap(),
-    val id: String? = null,
-    override val bbox: BoundingBox? = null
-) : GeoJson {
-    private val _properties: MutableMap<String, JsonElement> = properties.toMutableMap()
-    val properties: Map<String, JsonElement> get() = _properties
+data class Feature<out G : Geometry?, out P : @Serializable Any?>
+@JvmOverloads
+constructor(
+    val geometry: G,
+    val properties: P,
+    val id: FeatureId? = null,
+    override val bbox: BoundingBox? = null,
+) : GeoJsonObject {
 
-    fun setStringProperty(key: String, value: String?) {
-        _properties[key] = JsonPrimitive(value)
+    init {
+        require(id == null || id.isString || id.content.matches(numberRegex)) {
+            "Feature.id must be a string or a base-10 number; got $id"
+        }
     }
 
-    fun setNumberProperty(key: String, value: Number?) {
-        _properties[key] = JsonPrimitive(value)
-    }
-
-    fun setBooleanProperty(key: String, value: Boolean?) {
-        _properties[key] = JsonPrimitive(value)
-    }
-
-    fun setJsonProperty(key: String, value: JsonElement) {
-        _properties[key] = value
-    }
-
-    fun getStringProperty(key: String): String? = properties[key]?.jsonPrimitive?.content
-
-    fun getNumberProperty(key: String): Number? = properties[key]?.jsonPrimitive?.double
-
-    fun getBooleanProperty(key: String): Boolean? = properties[key]?.jsonPrimitive?.boolean
-
-    fun getJsonProperty(key: String): JsonElement? = properties[key]
-
-    fun removeProperty(key: String): Any? = _properties.remove(key)
-
-    /**
-     * Gets the value of the property with the given [key].
-     *
-     * @param key The string key for the property
-     * @return The value of the property cast to [T]?, or null if the key had no value.
-     */
-    @JvmName("getPropertyCast")
-    inline fun <reified T : Any?> getProperty(key: String): T? = properties[key] as T?
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as Feature
-
-        if (geometry != other.geometry) return false
-        if (id != other.id) return false
-        if (bbox != other.bbox) return false
-        if (_properties != other._properties) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = geometry?.hashCode() ?: 0
-        result = 31 * result + (id?.hashCode() ?: 0)
-        result = 31 * result + (bbox?.hashCode() ?: 0)
-        result = 31 * result + _properties.hashCode()
-        return result
-    }
-
-    operator fun component1(): Geometry? = geometry
-    operator fun component2(): Map<String, JsonElement> = properties
-    operator fun component3(): String? = id
-    operator fun component4(): BoundingBox? = bbox
-
-    override fun toString(): String = json()
-
-    override fun json(): String =
-        """{"type":"Feature",${bbox.jsonProp()}"geometry":${geometry?.json()},${idProp()}"properties":${
-            Json.encodeToString(
-                MapSerializer(
-                    String.serializer(),
-                    JsonElement.serializer()
-                ), properties
-            )
-        }}"""
-
-    fun copy(
-        geometry: Geometry? = this.geometry,
-        properties: Map<String, JsonElement> = this.properties,
-        id: String? = this.id,
-        bbox: BoundingBox? = this.bbox
-    ): Feature = Feature(geometry, properties, id, bbox)
-
+    /** Factory methods for creating and serializing [Feature] objects. */
     companion object {
+        private val numberRegex = Regex("""^-?\d+(\.\d+)?$""")
+
+        /**
+         * Deserializes a [Feature] from a JSON string.
+         *
+         * @param json The JSON string to deserialize.
+         * @return The deserialized [Feature].
+         * @throws SerializationException if the JSON string is invalid or cannot be deserialized.
+         * @throws IllegalArgumentException if the JSON contains an invalid [Feature].
+         */
+        @JvmSynthetic
+        @JvmName("inlineFromJson")
+        inline fun <reified G : Geometry?, reified P : @Serializable Any?> fromJson(
+            @Language("json") json: String
+        ): Feature<G, P> = GeoJson.decodeFromString(json)
+
+        /**
+         * Deserializes a [Feature] from a JSON string, or returns null on failure.
+         *
+         * @param json The JSON string to deserialize.
+         * @return The deserialized [Feature], or null if deserialization fails.
+         */
+        @JvmSynthetic
+        @JvmName("inlineFromJsonOrNull")
+        inline fun <reified G : Geometry?, reified P : @Serializable Any?> fromJsonOrNull(
+            @Language("json") json: String
+        ): Feature<G, P>? = GeoJson.decodeFromStringOrNull(json)
+
+        // Publish for Java below; Kotlin should use the inline reified versions above
+
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: String): Feature = fromJson(Json.decodeFromString(JsonObject.serializer(), json))
+        internal fun fromJson(json: String): Feature<Geometry?, JsonObject?> =
+            GeoJson.decodeFromString<Feature<Geometry?, JsonObject?>>(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJsonOrNull(json: String): Feature? = try {
-            fromJson(json)
-        } catch (_: Exception) {
-            null
-        }
+        internal fun fromJsonOrNull(json: String): Feature<Geometry?, JsonObject?>? =
+            GeoJson.decodeFromStringOrNull<Feature<Geometry?, JsonObject?>>(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: JsonObject): Feature {
-            require(json.getValue("type").jsonPrimitive.content == "Feature") {
-                "Object \"type\" is not \"Feature\"."
-            }
+        internal fun toJson(feature: Feature<Geometry?, JsonObject?>): String = feature.toJson()
 
-            val bbox = json["bbox"]?.jsonArray?.toBbox()
-            val id = json["id"]?.jsonPrimitive?.content
+        @PublishedApi
+        @JvmStatic
+        internal fun <T> toJson(
+            feature: Feature<Geometry?, T>,
+            propertiesSerializer: KSerializer<T>,
+        ): String =
+            GeoJson.jsonFormat.encodeToString(
+                serializer(Geometry.Companion.serializer().nullable, propertiesSerializer),
+                feature,
+            )
 
-            val geom = json["geometry"]?.jsonObject
-            val geometry: Geometry? = if (geom != null) Geometry.fromJson(geom) else null
+        // JsonObject property accessors
 
-            return Feature(geometry, json["properties"]?.jsonObject ?: emptyMap(), id, bbox)
-        }
+        /**
+         * Checks if a property exists in the feature's [JsonObject] properties.
+         *
+         * @param key The property key to check.
+         * @return True if the property exists, false otherwise.
+         * @receiver The feature to check.
+         */
+        @JvmStatic
+        fun Feature<*, JsonObject?>.containsProperty(key: String): Boolean =
+            properties?.containsKey(key) ?: false
+
+        /**
+         * Gets a string property from the feature's [JsonObject] properties.
+         *
+         * @param key The property key.
+         * @return The string value, or null if the property doesn't exist or isn't a string.
+         * @receiver The feature to get the property from.
+         */
+        @JvmStatic
+        fun Feature<*, JsonObject?>.getStringProperty(key: String): String? =
+            properties?.get(key)?.let { Json.decodeFromJsonElement(it) }
+
+        /**
+         * Gets a double property from the feature's [JsonObject] properties.
+         *
+         * @param key The property key.
+         * @return The double value, or null if the property doesn't exist or isn't a number.
+         * @receiver The feature to get the property from.
+         */
+        @JvmStatic
+        fun Feature<*, JsonObject?>.getDoubleProperty(key: String): Double? =
+            properties?.get(key)?.let { Json.decodeFromJsonElement(it) }
+
+        /**
+         * Gets an integer property from the feature's [JsonObject] properties.
+         *
+         * @param key The property key.
+         * @return The integer value, or null if the property doesn't exist or isn't a number.
+         * @receiver The feature to get the property from.
+         */
+        @JvmStatic
+        fun Feature<*, JsonObject?>.getIntProperty(key: String): Int? =
+            properties?.get(key)?.let { Json.decodeFromJsonElement(it) }
+
+        /**
+         * Gets a boolean property from the feature's [JsonObject] properties.
+         *
+         * @param key The property key.
+         * @return The boolean value, or null if the property doesn't exist or isn't a boolean.
+         * @receiver The feature to get the property from.
+         */
+        @JvmStatic
+        fun Feature<*, JsonObject?>.getBooleanProperty(key: String): Boolean? =
+            properties?.get(key)?.let { Json.decodeFromJsonElement(it) }
     }
 }

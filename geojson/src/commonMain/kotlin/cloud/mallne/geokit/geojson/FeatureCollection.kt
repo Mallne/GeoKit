@@ -1,78 +1,108 @@
 package cloud.mallne.geokit.geojson
 
 import cloud.mallne.geokit.geojson.serialization.FeatureCollectionSerializer
-import cloud.mallne.geokit.geojson.serialization.jsonJoin
-import cloud.mallne.geokit.geojson.serialization.jsonProp
-import cloud.mallne.geokit.geojson.serialization.toBbox
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.*
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.json.JsonObject
+import org.intellij.lang.annotations.Language
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
+import kotlin.jvm.JvmSynthetic
 
 /**
- * A FeatureCollection object is a collection of [Feature] objects.
- * This class implements the [Collection] interface and can be used as a Collection directly.
- * The list of features contained in this collection are also accessible through the [features] property.
+ * A [FeatureCollection] object is a collection of [Feature] objects. This class implements the
+ * [Collection] interface and can be used as a collection directly. The list of [Feature] objects
+ * contained in this [FeatureCollection] is also accessible through the [features] property.
  *
- * @see <a href="https://tools.ietf.org/html/rfc7946#section-3.3">https://tools.ietf.org/html/rfc7946#section-3.3</a>
+ * See [RFC 7946 Section 3.3](https://tools.ietf.org/html/rfc7946#section-3.3) for the full
+ * specification.
  *
- * @property features The collection of [Feature] objects stored in this collection
+ * @property features The collection of [Feature] objects stored in this [FeatureCollection]
  */
 @Serializable(with = FeatureCollectionSerializer::class)
-class FeatureCollection(
-    val features: List<Feature> = emptyList(),
-    override val bbox: BoundingBox? = null
-) : Collection<Feature> by features, GeoJson {
+data class FeatureCollection<out G : Geometry?, out P : @Serializable Any?>
+@JvmOverloads
+constructor(
+    val features: List<Feature<G, P>> = emptyList(),
+    override val bbox: BoundingBox? = null,
+) : Collection<Feature<G, P>> by features, GeoJsonObject {
+    /**
+     * Constructs a [FeatureCollection] from a vararg of [Feature] objects.
+     *
+     * @param features The [Feature] objects to include in this [FeatureCollection].
+     * @param bbox The [BoundingBox] for this [FeatureCollection].
+     */
+    @JvmOverloads
+    constructor(
+        vararg features: Feature<G, P>,
+        bbox: BoundingBox? = null,
+    ) : this(features.toMutableList(), bbox)
 
-    constructor(vararg features: Feature, bbox: BoundingBox? = null) : this(features.toMutableList(), bbox)
+    /**
+     * Get the feature at the specified index.
+     *
+     * @param index The index of the feature to retrieve.
+     * @return The feature at the specified index.
+     */
+    operator fun get(index: Int): Feature<G, P> = features[index]
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as FeatureCollection
-
-        if (features != other.features) return false
-        if (bbox != other.bbox) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = features.hashCode()
-        result = 31 * result + (bbox?.hashCode() ?: 0)
-        return result
-    }
-
-    override fun toString(): String = json()
-
-    override fun json(): String =
-        """{"type":"FeatureCollection",${bbox.jsonProp()}"features":${features.jsonJoin { it.json() }}}"""
-
-    operator fun component1(): List<Feature> = features
-    operator fun component2(): BoundingBox? = bbox
-
+    /** Factory methods for creating and serializing [FeatureCollection] objects. */
     companion object {
+        /**
+         * Deserializes a [FeatureCollection] from a JSON string.
+         *
+         * @param json The JSON string to deserialize.
+         * @return The deserialized [FeatureCollection].
+         * @throws SerializationException if the JSON string is invalid or cannot be deserialized.
+         * @throws IllegalArgumentException if the JSON contains an invalid [FeatureCollection].
+         */
+        @JvmSynthetic
+        @JvmName("inlineFromJson")
+        inline fun <reified G : Geometry?, reified P : @Serializable Any?> fromJson(
+            @Language("json") json: String
+        ): FeatureCollection<G, P> = GeoJson.decodeFromString(json)
+
+        /**
+         * Deserializes a [FeatureCollection] from a JSON string, or returns null on failure.
+         *
+         * @param json The JSON string to deserialize.
+         * @return The deserialized [FeatureCollection], or null if deserialization fails.
+         */
+        @JvmSynthetic
+        @JvmName("inlineFromJsonOrNull")
+        inline fun <reified G : Geometry?, reified P : @Serializable Any?> fromJsonOrNull(
+            @Language("json") json: String
+        ): FeatureCollection<G, P>? = GeoJson.decodeFromStringOrNull(json)
+
+        // Publish for Java below; Kotlin should use the inline reified versions above
+
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: String): FeatureCollection =
-            fromJson(Json.decodeFromString(JsonObject.serializer(), json))
+        internal fun fromJson(json: String): FeatureCollection<Geometry?, JsonObject?> =
+            GeoJson.decodeFromString<FeatureCollection<Geometry?, JsonObject?>>(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJsonOrNull(json: String): FeatureCollection? = try {
-            fromJson(json)
-        } catch (_: Exception) {
-            null
-        }
+        internal fun fromJsonOrNull(json: String): FeatureCollection<Geometry?, JsonObject?>? =
+            GeoJson.decodeFromStringOrNull<FeatureCollection<Geometry?, JsonObject?>>(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: JsonObject): FeatureCollection {
-            require(json.getValue("type").jsonPrimitive.content == "FeatureCollection") {
-                "Object \"type\" is not \"FeatureCollection\"."
-            }
+        internal fun toJson(featureCollection: FeatureCollection<Geometry?, JsonObject?>): String =
+            featureCollection.toJson()
 
-            val bbox = json["bbox"]?.jsonArray?.toBbox()
-            val features = json.getValue("features").jsonArray.map { Feature.fromJson(it.jsonObject) }
-
-            return FeatureCollection(features, bbox)
-        }
+        @PublishedApi
+        @JvmStatic
+        internal fun <T> toJson(
+            featureCollection: FeatureCollection<Geometry?, T>,
+            propertiesSerializer: KSerializer<T>,
+        ): String =
+            GeoJson.jsonFormat.encodeToString(
+                serializer(Geometry.Companion.serializer().nullable, propertiesSerializer),
+                featureCollection,
+            )
     }
 }

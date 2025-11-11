@@ -1,57 +1,30 @@
 package cloud.mallne.geokit.geojson.serialization
 
 import cloud.mallne.geokit.geojson.Position
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.DoubleArraySerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.StructureKind
-import kotlinx.serialization.descriptors.buildSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.*
 
-/**
- * [KSerializer] implementation for implementations of the [Position] interface.
- * Serializes a Position down to an array of numbers as specified by GeoJSON.
- * This serializer only works for converting to and from JSON.
- * A position maps to `[longitude, latitude, altitude]`.
- *
- * A position's [altitude][Position.altitude] is only included in the array if it is not null.
- *
- * An instance of the serializer can be obtained from the [Position.serializer][Position.Companion.serializer]
- * extension function.
- *
- * @see Position.Companion.serializer
- */
-object PositionSerializer : KSerializer<Position> {
-    @OptIn(InternalSerializationApi::class)
-    override val descriptor: SerialDescriptor
-        get() = buildSerialDescriptor("Position", StructureKind.LIST)
+/** Serializes a [Position] by invoking [DoubleArraySerializer] on the coordinates. */
+internal object PositionSerializer : KSerializer<Position> {
+    private val delegate = DoubleArraySerializer()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
 
     override fun deserialize(decoder: Decoder): Position {
-        val input = decoder as? JsonDecoder ?: throw SerializationException("This class can only be loaded from JSON")
+        val array = delegate.deserialize(decoder)
 
-        val array = input.decodeJsonElement().jsonArray
+        if (array.size < 2)
+            throw SerializationException(
+                "Position data requires at least two elements [longitude, latitude]. Found array of size: ${array.size}"
+            )
 
-        return Position(
-            array[0].jsonPrimitive.double,
-            array[1].jsonPrimitive.double,
-            array.getOrNull(2)?.jsonPrimitive?.double
-        )
+        return Position(array)
     }
 
-    override fun serialize(encoder: Encoder, value: Position) {
-        encoder as? JsonEncoder ?: throw SerializationException("This class can only be saved as JSON")
-
-        val array = buildJsonArray {
-            add(value.longitude)
-            add(value.latitude)
-            if (value.altitude != null) {
-                add(value.altitude)
-            }
-        }
-
-        encoder.encodeJsonElement(array)
-    }
+    override fun serialize(encoder: Encoder, value: Position): Unit =
+        delegate.serialize(encoder, value.coordinates)
 }

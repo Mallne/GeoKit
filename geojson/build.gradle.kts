@@ -28,8 +28,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(libs.jetbrains.annotations)
                 api(libs.kotlinx.serialization.json)
-                api(libs.mlln.units)
                 api(project(":calculation"))
             }
         }

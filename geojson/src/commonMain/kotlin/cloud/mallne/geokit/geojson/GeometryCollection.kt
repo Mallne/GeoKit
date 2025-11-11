@@ -1,69 +1,85 @@
 package cloud.mallne.geokit.geojson
 
-import cloud.mallne.geokit.geojson.serialization.GeometrySerializer
-import cloud.mallne.geokit.geojson.serialization.jsonJoin
-import cloud.mallne.geokit.geojson.serialization.jsonProp
-import cloud.mallne.geokit.geojson.serialization.toBbox
+import cloud.mallne.geokit.geojson.serialization.GeometryCollectionSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.*
+import kotlinx.serialization.SerializationException
+import org.intellij.lang.annotations.Language
+import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
+import kotlin.jvm.JvmSynthetic
 
-@Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
-@Serializable(with = GeometrySerializer::class)
-class GeometryCollection @JvmOverloads constructor(
-    val geometries: List<Geometry>,
-    override val bbox: BoundingBox? = null
-) : Geometry(), Collection<Geometry> by geometries {
+/**
+ * A [GeometryCollection] contains multiple, heterogeneous [Geometry] objects.
+ *
+ * See [RFC 7946 Section 3.1.8](https://tools.ietf.org/html/rfc7946#section-3.1.8) for the full
+ * specification.
+ */
+@Serializable(with = GeometryCollectionSerializer::class)
+data class GeometryCollection<out G : Geometry>
+@JvmOverloads
+constructor(
+    /** The [Geometry] objects in this [GeometryCollection]. */
+    val geometries: List<G>,
+    /** The [BoundingBox] of this [GeometryCollection]. */
+    override val bbox: BoundingBox? = null,
+) : Geometry, Collection<G> by geometries {
+
+    /**
+     * Create a [GeometryCollection] by a number of [Geometry] objects.
+     *
+     * @param geometries The [Geometry] objects that make up this [GeometryCollection].
+     * @param bbox The [BoundingBox] of this [GeometryCollection].
+     */
     @JvmOverloads
-    constructor(vararg geometries: Geometry, bbox: BoundingBox? = null) : this(geometries.toList(), bbox)
+    constructor(
+        vararg geometries: G,
+        bbox: BoundingBox? = null,
+    ) : this(geometries.toList(), bbox)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as GeometryCollection
-
-        if (geometries != other.geometries) return false
-        if (bbox != other.bbox) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = geometries.hashCode()
-        result = 31 * result + (bbox?.hashCode() ?: 0)
-        return result
-    }
-
-    override fun json(): String =
-        """{"type":"GeometryCollection",${bbox.jsonProp()}"geometries":${geometries.jsonJoin { it.json() }}}"""
-
+    /** Factory methods for creating and serializing [GeometryCollection] objects. */
     companion object {
+        /**
+         * Deserialize a [GeometryCollection] from a JSON string.
+         *
+         * @param json The JSON string to parse.
+         * @return The deserialized [GeometryCollection].
+         * @throws SerializationException if the JSON string is invalid or cannot be deserialized.
+         * @throws IllegalArgumentException if the JSON contains an invalid [GeometryCollection].
+         */
+        @JvmSynthetic
+        @JvmName("inlineFromJson")
+        inline fun <reified G : Geometry> fromJson(
+            @Language("json") json: String
+        ): GeometryCollection<G> = GeoJson.decodeFromString(json)
+
+        /**
+         * Deserialize a [GeometryCollection] from a JSON string, or null if parsing fails.
+         *
+         * @param json The JSON string to parse.
+         * @return The deserialized [GeometryCollection], or null if parsing fails.
+         */
+        @JvmSynthetic
+        @JvmName("inlineFromJsonOrNull")
+        inline fun <reified T : Geometry> fromJsonOrNull(
+            @Language("json") json: String
+        ): GeometryCollection<T>? = GeoJson.decodeFromStringOrNull(json)
+
+        // Publish for Java below; Kotlin should use the inline reified versions above
+
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: String): GeometryCollection =
-            fromJson(Json.decodeFromString(JsonObject.serializer(), json))
+        internal fun fromJson(json: String): GeometryCollection<*> =
+            GeoJson.decodeFromString<GeometryCollection<Geometry>>(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJsonOrNull(json: String): GeometryCollection? = try {
-            fromJson(json)
-        } catch (_: Exception) {
-            null
-        }
+        internal fun fromJsonOrNull(json: String): GeometryCollection<*>? =
+            GeoJson.decodeFromStringOrNull<GeometryCollection<Geometry>>(json)
 
+        @PublishedApi
         @JvmStatic
-        fun fromJson(json: JsonObject): GeometryCollection {
-            require(json.getValue("type").jsonPrimitive.content == "GeometryCollection") {
-                "Object \"type\" is not \"GeometryCollection\"."
-            }
-
-            val geometries = json.getValue("geometries").jsonArray.map {
-                Geometry.fromJson(it.jsonObject)
-            }
-
-            val bbox = json["bbox"]?.jsonArray?.toBbox()
-
-            return GeometryCollection(geometries, bbox)
-        }
+        internal fun toJson(geometryCollection: GeometryCollection<Geometry>): String =
+            geometryCollection.toJson()
     }
 }

@@ -1,65 +1,111 @@
 package cloud.mallne.geokit.geojson
 
-import cloud.mallne.geokit.geojson.serialization.GeometrySerializer
-import cloud.mallne.geokit.geojson.serialization.jsonProp
-import cloud.mallne.geokit.geojson.serialization.toBbox
-import cloud.mallne.geokit.geojson.serialization.toPosition
+import cloud.mallne.geokit.geojson.Point.Companion.fromGeoUri
+import cloud.mallne.geokit.geojson.serialization.GeoUriParser
+import cloud.mallne.geokit.geojson.serialization.PointSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.SerializationException
+import org.intellij.lang.annotations.Language
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-@Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
-@Serializable(with = GeometrySerializer::class)
-class Point @JvmOverloads constructor(val coordinates: Position, override val bbox: BoundingBox? = null) :
-    Geometry() {
+/**
+ * A [Point] geometry represents a single [Position] in coordinate space.
+ *
+ * See [RFC 7946 Section 3.1.2](https://tools.ietf.org/html/rfc7946#section-3.1.2) for the full
+ * specification.
+ *
+ * @see MultiPoint
+ */
+@Serializable(with = PointSerializer::class)
+data class Point
+@JvmOverloads
+constructor(
+    /** The [Position] of this [Point]. */
+    val coordinates: Position,
+    /** The [BoundingBox] of this [Point]. */
+    override val bbox: BoundingBox? = null,
+) : SingleGeometry, PointGeometry {
+
+    /** The longitude value of this [Point] in degrees. */
+    val longitude: Double
+        get() = coordinates.longitude
+
+    /** The latitude value of this [Point] in degrees. */
+    val latitude: Double
+        get() = coordinates.latitude
+
+    /** The altitude value of this [Point] in meters. */
+    val altitude: Double?
+        get() = coordinates.altitude
+
+    /**
+     * Create a [Point] from individual coordinate components.
+     *
+     * @param longitude The longitude of the [Point].
+     * @param latitude The latitude of the [Point].
+     * @param altitude The altitude of the [Point], or null if not specified.
+     * @param bbox The [BoundingBox] of this [Point].
+     */
     @JvmOverloads
-    constructor(coordinates: DoubleArray, bbox: BoundingBox? = null) : this(Position(coordinates), bbox)
+    constructor(
+        longitude: Double,
+        latitude: Double,
+        altitude: Double? = null,
+        bbox: BoundingBox? = null,
+    ) : this(Position(longitude, latitude, altitude), bbox)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
+    /**
+     * Converts this [Point] to a `geo` URI of the format `geo:lat,lon` or `geo:lat,lon,alt` as
+     * defined in [RFC 7946 Section 9](https://datatracker.ietf.org/doc/html/rfc7946#section-9).
+     *
+     * @return A geo URI string representing this point.
+     * @see fromGeoUri
+     */
+    fun toGeoUri(): String =
+        if (coordinates.hasAltitude)
+            "geo:${coordinates.latitude},${coordinates.longitude},${coordinates.altitude}"
+        else "geo:${coordinates.latitude},${coordinates.longitude}"
 
-        other as Point
-
-        if (coordinates != other.coordinates) return false
-        if (bbox != other.bbox) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = coordinates.hashCode()
-        result = 31 * result + (bbox?.hashCode() ?: 0)
-        return result
-    }
-
-    override fun json(): String = """{"type":"Point",${bbox.jsonProp()}"coordinates":${coordinates.json()}}"""
-
+    /** Factory methods for creating and serializing [Point] objects. */
     companion object {
+        /**
+         * Create a [Point] from a `geo` URI string.
+         *
+         * The `geo` URI format is defined in
+         * [RFC 7946 Section 9](https://datatracker.ietf.org/doc/html/rfc7946#section-9).
+         *
+         * @param uri The geo URI string to parse.
+         * @return A [Point] parsed from the URI.
+         * @throws IllegalArgumentException if [uri] is not a valid GeoURI.
+         * @see toGeoUri
+         */
         @JvmStatic
-        fun fromJson(json: String): Point = fromJson(Json.decodeFromString(JsonObject.serializer(), json))
+        fun fromGeoUri(uri: String): Point = Point(GeoUriParser.parsePosition(uri))
 
+        /**
+         * Deserialize a [Point] from a JSON string.
+         *
+         * @param json The JSON string to parse.
+         * @return The deserialized [Point].
+         * @throws SerializationException if the JSON string is invalid or cannot be deserialized.
+         * @throws IllegalArgumentException if the geometry does not meet structural requirements.
+         */
         @JvmStatic
-        fun fromJsonOrNull(json: String): Point? = try {
-            fromJson(json)
-        } catch (_: Exception) {
-            null
-        }
+        fun fromJson(@Language("json") json: String): Point = GeoJson.decodeFromString(json)
 
+        /**
+         * Deserialize a [Point] from a JSON string, or null if parsing fails.
+         *
+         * @param json The JSON string to parse.
+         * @return The deserialized [Point], or null if parsing fails.
+         */
         @JvmStatic
-        fun fromJson(json: JsonObject): Point {
-            require(json.getValue("type").jsonPrimitive.content == "Point") {
-                "Object \"type\" is not \"Point\"."
-            }
+        fun fromJsonOrNull(@Language("json") json: String): Point? =
+            GeoJson.decodeFromStringOrNull(json)
 
-            val coords = json.getValue("coordinates").jsonArray.toPosition()
-            val bbox = json["bbox"]?.jsonArray?.toBbox()
-
-            return Point(coords, bbox)
-        }
+        @PublishedApi
+        @JvmStatic
+        internal fun toJson(point: Point): String = point.toJson()
     }
 }

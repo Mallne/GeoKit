@@ -1,12 +1,11 @@
 package cloud.mallne.geokit.geojson.serialization
 
 import cloud.mallne.geokit.geojson.BoundingBox
-import cloud.mallne.geokit.geojson.Feature
-import cloud.mallne.geokit.geojson.FeatureCollection
 import cloud.mallne.geokit.geojson.Geometry
+import cloud.mallne.geokit.geojson.GeometryCollection
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.nullable
@@ -16,58 +15,57 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.json.JsonEncoder
 
-internal class FeatureCollectionSerializer<T : Geometry?, P : @Serializable Any?>(
-    geometrySerializer: KSerializer<T>,
-    propertiesSerializer: KSerializer<P>,
-) : KSerializer<FeatureCollection<T, P>> {
-    private val serialName: String = "FeatureCollection"
+internal class GeometryCollectionSerializer<T : Geometry>(geometrySerializer: KSerializer<T>) :
+    KSerializer<GeometryCollection<T>> {
+    private val serialName: String = "GeometryCollection"
     private val typeSerializer = String.serializer()
     private val bboxSerializer = BoundingBox.serializer().nullable
-    private val featuresSerializer =
-        ListSerializer(Feature.serializer(geometrySerializer, propertiesSerializer))
+    private val geometriesSerializer = ListSerializer(geometrySerializer)
 
     override val descriptor: SerialDescriptor =
         buildClassSerialDescriptor(serialName) {
             element("type", typeSerializer.descriptor)
             element("bbox", bboxSerializer.descriptor)
-            element("features", featuresSerializer.descriptor)
+            element("geometries", geometriesSerializer.descriptor)
         }
 
-    override fun serialize(encoder: Encoder, value: FeatureCollection<T, P>) {
+    override fun serialize(encoder: Encoder, value: GeometryCollection<T>) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(descriptor, 0, typeSerializer, serialName)
             if (value.bbox != null || encoder !is JsonEncoder)
                 encodeSerializableElement(descriptor, 1, bboxSerializer, value.bbox)
-            encodeSerializableElement(descriptor, 2, featuresSerializer, value.features)
+            encodeSerializableElement(descriptor, 2, geometriesSerializer, value.geometries)
         }
     }
 
-    override fun deserialize(decoder: Decoder): FeatureCollection<T, P> {
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun deserialize(decoder: Decoder): GeometryCollection<T> {
         return decoder.decodeStructure(descriptor) {
             var type: String? = null
             var bbox: BoundingBox? = null
-            var features: List<Feature<T, P>>? = null
+            var geometries: List<T>? = null
 
-            @OptIn(ExperimentalSerializationApi::class)
             if (decodeSequentially()) {
                 type = decodeSerializableElement(descriptor, 0, typeSerializer)
                 bbox = decodeSerializableElement(descriptor, 1, bboxSerializer)
-                features = decodeSerializableElement(descriptor, 2, featuresSerializer)
+                geometries = decodeSerializableElement(descriptor, 2, geometriesSerializer)
             } else {
                 while (true) when (val index = decodeElementIndex(descriptor)) {
                     CompositeDecoder.DECODE_DONE -> break
                     0 -> type = decodeSerializableElement(descriptor, 0, typeSerializer)
                     1 -> bbox = decodeSerializableElement(descriptor, 1, bboxSerializer)
-                    2 -> features = decodeSerializableElement(descriptor, 2, featuresSerializer)
+                    2 -> geometries = decodeSerializableElement(descriptor, 2, geometriesSerializer)
                     else -> throw SerializationException("Unknown index $index")
                 }
             }
 
+            if (type == null) throw MissingFieldException("type", serialName)
+            if (geometries == null) throw MissingFieldException("geometries", serialName)
+
             if (type != serialName)
                 throw SerializationException("Expected type $serialName but found $type")
-            if (features == null) throw SerializationException("Expected features to be present")
 
-            FeatureCollection(features, bbox)
+            GeometryCollection(geometries, bbox)
         }
     }
 }
