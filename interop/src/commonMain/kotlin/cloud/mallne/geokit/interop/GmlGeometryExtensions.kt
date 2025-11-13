@@ -2,20 +2,22 @@ package cloud.mallne.geokit.interop
 
 import cloud.mallne.geokit.geojson.*
 import cloud.mallne.geokit.geojson.CalculationInterop.toPosition
-import cloud.mallne.geokit.gml.model.Exterior
-import cloud.mallne.geokit.gml.model.Interior
-import cloud.mallne.geokit.gml.model.LinearRing
-import cloud.mallne.geokit.gml.model.SurfaceMember
-import cloud.mallne.geokit.gml.model.geometry.MultiSurface
 import cloud.mallne.geokit.interop.GmlExtensions.toGeoJson
 import cloud.mallne.geokit.interop.GmlExtensions.toGml
-import cloud.mallne.geokit.gml.model.geometry.Geometry as GmlGeometry
-import cloud.mallne.geokit.gml.model.geometry.LineString as GmlLineString
-import cloud.mallne.geokit.gml.model.geometry.MultiLineString as GmlMultiLineString
-import cloud.mallne.geokit.gml.model.geometry.MultiPoint as GmlMultiPoint
-import cloud.mallne.geokit.gml.model.geometry.MultiPolygon as GmlMultiPolygon
-import cloud.mallne.geokit.gml.model.geometry.Point as GmlPoint
-import cloud.mallne.geokit.gml.model.geometry.Polygon as GmlPolygon
+import cloud.mallne.geokit.ogc.model.Exterior
+import cloud.mallne.geokit.ogc.model.Interior
+import cloud.mallne.geokit.ogc.model.SurfaceMember
+import cloud.mallne.geokit.ogc.model.geometry.Curve
+import cloud.mallne.geokit.ogc.model.geometry.MultiSurface
+import cloud.mallne.geokit.ogc.model.ring.AbstractRing.Companion.extractCoordinates
+import cloud.mallne.geokit.ogc.model.ring.LinearRing
+import cloud.mallne.geokit.ogc.model.geometry.Geometry as GmlGeometry
+import cloud.mallne.geokit.ogc.model.geometry.LineString as GmlLineString
+import cloud.mallne.geokit.ogc.model.geometry.MultiLineString as GmlMultiLineString
+import cloud.mallne.geokit.ogc.model.geometry.MultiPoint as GmlMultiPoint
+import cloud.mallne.geokit.ogc.model.geometry.MultiPolygon as GmlMultiPolygon
+import cloud.mallne.geokit.ogc.model.geometry.Point as GmlPoint
+import cloud.mallne.geokit.ogc.model.geometry.Polygon as GmlPolygon
 
 object GmlGeometryExtensions {
     fun Geometry.toGml(): GmlGeometry = when (this) {
@@ -36,13 +38,25 @@ object GmlGeometryExtensions {
         is MultiSurface -> this.toGeoJson()
         is GmlPoint -> this.toGeoJson()
         is GmlPolygon -> this.toGeoJson()
+        is Curve -> this.toGeoJson()
+    }
+
+    /**
+     * The GML Curve to GeoJSON LineString converter function.
+     */
+    fun Curve.toGeoJson(): LineString {
+        // A Curve is converted by flattening the coordinates of all its constituent segments.
+        val flattenedCoords = this.segments.segments.flatMap { segment ->
+            segment.posList.toGeoJson()
+        }
+        return LineString(flattenedCoords)
     }
 
     fun GeometryCollection<*>.toGml(): MultiSurface =
         MultiSurface(surfaceMembers = this.geometries.map { SurfaceMember(it.toGml()) })
 
-    fun MultiSurface.toGeoJson(): GeometryCollection<Geometry> =
-        GeometryCollection(geometries = this.surfaceMembers.map { it.geometry.toGeoJson() })
+    fun MultiSurface.toGeoJson(): MultiPolygon =
+        MultiPolygon(geometries = this.surfaceMembers.map { it.geometry.toGeoJson() })
 
     fun LineString.toGml(): GmlLineString = GmlLineString(posList = this.coordinates.toGml())
     fun GmlLineString.toGeoJson(): LineString = LineString(this.posList.toGeoJson())
@@ -77,10 +91,18 @@ object GmlGeometryExtensions {
     )
 
     fun GmlPolygon.toGeoJson(): Polygon {
-        val ext = this.exterior.ring.posList.toGeoJson()
-        val int = this.interior.map { it.posList.toGeoJson() }.toMutableList()
-        int.add(0, ext)
-        return Polygon(int)
+        // 1. Extract exterior ring coordinates
+        val exteriorCoords = this.exterior.ring.extractCoordinates().toGeoJson()
+
+        // 2. Extract and map all interior ring coordinates
+        val interiorCoords = this.interior.rings.map { it.extractCoordinates().toGeoJson() }
+
+        // 3. Build the final GeoJSON structure: [ [exterior], [interior1], [interior2], ... ]
+        val allRings = mutableListOf<List<Position>>()
+        allRings.add(exteriorCoords)
+        allRings.addAll(interiorCoords)
+
+        return Polygon(allRings)
     }
 
     fun Position.toGmlPoint(): GmlPoint = GmlPoint(pos = this.toGml())

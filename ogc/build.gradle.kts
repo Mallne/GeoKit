@@ -28,8 +28,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":ogc"))
-                implementation(project(":geojson"))
+                api(libs.kotlinx.serialization.json)
+                api(libs.xmlutil.serialization)
+                api(libs.xmlutil.serialization.core)
+                api(libs.mlln.units)
+                api(project(":calculation"))
             }
         }
 
@@ -63,7 +66,7 @@ mavenPublishing {
                 version = project.version.toString()
 
                 pom {
-                    name = "GeoKit GeoJson and GML Interop"
+                    name = "GeoKit OGC"
                     inceptionYear = "2025"
                     developers {
                         developer {

@@ -28,6 +28,6 @@ if (unitsDir.exists()) {
 
 include(":calculation")
 include(":geojson")
-include(":gml")
+include(":ogc")
 include(":interop")
 include(":coordinates")
