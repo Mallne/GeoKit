@@ -1,7 +1,7 @@
 package cloud.mallne.geokit.ogc.model.wfs
 
 import cloud.mallne.geokit.ogc.Namespaces
-import cloud.mallne.geokit.ogc.model.geometry.Geometry
+import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -28,15 +28,15 @@ data class FeatureMember(
         return elements?.associate { (it as Element).localName to (it.getTextContent()?.trim() ?: "") } ?: emptyMap()
     }
 
-    fun geometry(prefix: String?, localPart: String, xml: XML = XML()): Geometry? {
+    fun geometry(prefix: String?, localPart: String, xml: XML = XML()): AbstractGeometryType? {
         val geomElement = content?.getElementsByTagName(if (prefix != null) "$prefix:$localPart" else localPart)
         val geomNode = geomElement?.firstOrNull() as? Element
         val node = geomNode?.getChildNodes()?.firstOrNull { it is Element } as? Element
         val serialized = node?.let { xml.encodeToString(it) }
-        return serialized?.let { xml.decodeFromString<Geometry>(it) }
+        return serialized?.let { xml.decodeFromString<AbstractGeometryType>(it) }
     }
 
-    fun geometry(localPart: String, xml: XML = XML()): Geometry? {
+    fun geometry(localPart: String, xml: XML = XML()): AbstractGeometryType? {
         return geometry(null, localPart, xml)
     }
 }

@@ -1,7 +1,7 @@
 package cloud.mallne.geokit.ogc.model.wfs
 
 import cloud.mallne.geokit.ogc.Namespaces
-import cloud.mallne.geokit.ogc.model.Envelope
+import cloud.mallne.geokit.ogc.model.gml.Envelope
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

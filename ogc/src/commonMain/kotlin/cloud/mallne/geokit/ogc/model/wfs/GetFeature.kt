@@ -1,9 +1,9 @@
 package cloud.mallne.geokit.ogc.model.wfs
 
 import cloud.mallne.geokit.ogc.Namespaces
-import cloud.mallne.geokit.ogc.model.Envelope
 import cloud.mallne.geokit.ogc.model.fes.BBOX
 import cloud.mallne.geokit.ogc.model.fes.Filter
+import cloud.mallne.geokit.ogc.model.gml.Envelope
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
@@ -14,13 +14,19 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @SerialName("GetFeature")
 @Serializable
 data class GetFeature(
-    val service: String = "WFS",
-    val version: String = "2.0.0",
+    override val service: String = "WFS",
+    override val version: String = "2.0.0",
     @XmlElement(true)
-    val queries: List<Query> = emptyList(),
+    val queries: List<AbstractQueryExpressionType> = emptyList(),
     val count: Int? = null,
-    val startIndex: Int? = null
-) {
+    val outputFormat: String? = null,
+    val resolve: ResolveValueType? = null,
+    val resolveTimeout: Int? = null,
+    val resultType: ResultTypeType? = null,
+    val startIndex: Int? = null,
+    override val handle: String? = null,
+    override val baseUrl: String? = null
+) : BaseRequestType() {
     companion object {
         /** Convenience helper: create a minimal GetFeature with a single Query constrained by an Envelope boundary. */
         fun withBbox(

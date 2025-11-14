@@ -2,22 +2,19 @@ package cloud.mallne.geokit.interop
 
 import cloud.mallne.geokit.geojson.*
 import cloud.mallne.geokit.geojson.CalculationInterop.toPosition
-import cloud.mallne.geokit.interop.GmlExtensions.toGeoJson
 import cloud.mallne.geokit.interop.GmlExtensions.toGml
-import cloud.mallne.geokit.ogc.model.Exterior
-import cloud.mallne.geokit.ogc.model.Interior
-import cloud.mallne.geokit.ogc.model.SurfaceMember
-import cloud.mallne.geokit.ogc.model.geometry.Curve
-import cloud.mallne.geokit.ogc.model.geometry.MultiSurface
-import cloud.mallne.geokit.ogc.model.ring.AbstractRing.Companion.extractCoordinates
-import cloud.mallne.geokit.ogc.model.ring.LinearRing
-import cloud.mallne.geokit.ogc.model.geometry.Geometry as GmlGeometry
-import cloud.mallne.geokit.ogc.model.geometry.LineString as GmlLineString
-import cloud.mallne.geokit.ogc.model.geometry.MultiLineString as GmlMultiLineString
-import cloud.mallne.geokit.ogc.model.geometry.MultiPoint as GmlMultiPoint
-import cloud.mallne.geokit.ogc.model.geometry.MultiPolygon as GmlMultiPolygon
-import cloud.mallne.geokit.ogc.model.geometry.Point as GmlPoint
-import cloud.mallne.geokit.ogc.model.geometry.Polygon as GmlPolygon
+import cloud.mallne.geokit.interop.GmlGeometryExtensions.toGeoJson
+import cloud.mallne.geokit.ogc.model.gml.geometry.Curve
+import cloud.mallne.geokit.ogc.model.gml.geometry.LinearRing
+import cloud.mallne.geokit.ogc.model.gml.geometry.MultiSurface
+import cloud.mallne.geokit.ogc.model.gml.member.SurfaceMember
+import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType as GmlGeometry
+import cloud.mallne.geokit.ogc.model.gml.geometry.LineString as GmlLineString
+import cloud.mallne.geokit.ogc.model.gml.geometry.MultiLineString as GmlMultiLineString
+import cloud.mallne.geokit.ogc.model.gml.geometry.MultiPoint as GmlMultiPoint
+import cloud.mallne.geokit.ogc.model.gml.geometry.MultiPolygon as GmlMultiPolygon
+import cloud.mallne.geokit.ogc.model.gml.geometry.Point as GmlPoint
+import cloud.mallne.geokit.ogc.model.gml.geometry.Polygon as GmlPolygon
 
 object GmlGeometryExtensions {
     fun Geometry.toGml(): GmlGeometry = when (this) {

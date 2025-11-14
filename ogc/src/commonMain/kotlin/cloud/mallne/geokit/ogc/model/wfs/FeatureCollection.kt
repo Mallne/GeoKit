@@ -16,8 +16,8 @@ data class FeatureCollection(
     val numberMatched: Long? = null,
     val numberReturned: Long? = null,
     @XmlElement(value = true)
-    val boundedBy: WfsBoundedBy? = null,
+    override val boundedBy: WfsBoundedBy? = null,
     @XmlSerialName("member", Namespaces.WFS, Namespaces.Prefix.WFS)
     @XmlElement(true)
     val members: List<FeatureMember> = emptyList()
-)
+) : SimpleFeatureCollectionType()

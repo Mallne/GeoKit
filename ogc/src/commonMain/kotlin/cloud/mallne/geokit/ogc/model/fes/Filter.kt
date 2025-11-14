@@ -8,6 +8,14 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("Filter", Namespaces.FES, Namespaces.Prefix.FES)
 @Serializable
 data class Filter(
-    @XmlElement(true)
-    val bbox: BBOX
-)
+    @XmlElement
+    val statialOps: SpatialOpsType? = null,
+    @XmlElement
+    val comparisonOps: ComparisonOpsType? = null,
+    @XmlElement
+    val temporalOps: TemporalOpsType? = null,
+    @XmlElement
+    val logicOps: LogicOpsType? = null,
+    @XmlElement
+    val extensionOps: ExtensionOpsType? = null,
+) : AbstractSelectionClauseType()

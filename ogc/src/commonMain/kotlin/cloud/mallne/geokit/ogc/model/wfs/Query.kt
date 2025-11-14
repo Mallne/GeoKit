@@ -16,5 +16,6 @@ data class Query(
     val typeNames: List<String>,
     val srsName: String? = null,
     @XmlElement(true)
-    val filter: Filter
-)
+    val filter: Filter,
+    override val handle: String? = null
+) : AbstractQueryExpressionType()

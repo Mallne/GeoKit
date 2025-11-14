@@ -2,10 +2,9 @@ package cloud.mallne.geokit.ogc
 
 import cloud.mallne.geokit.Boundary
 import cloud.mallne.geokit.Vertex
-import cloud.mallne.geokit.ogc.model.Envelope
-import cloud.mallne.geokit.ogc.model.LowerCorner
-import cloud.mallne.geokit.ogc.model.UpperCorner
 import cloud.mallne.geokit.ogc.model.fes.BBOX
+import cloud.mallne.geokit.ogc.model.gml.DirectPositionType
+import cloud.mallne.geokit.ogc.model.gml.Envelope
 import cloud.mallne.geokit.ogc.model.wfs.WfsBoundedBy
 
 
@@ -30,24 +29,27 @@ object Extensions {
 
     fun Boundary.toGmlBBOX(): BBOX = BBOX(
         envelope = Envelope(
-            lowerCorner = LowerCorner(this.southWest.toGml()),
-            upperCorner = UpperCorner(this.northEast.toGml())
+            lowerCorner = DirectPositionType(this.southWest.toGml()),
+            upperCorner = DirectPositionType(this.northEast.toGml())
         ),
     )
 
     fun BBOX.toBoundary(): Boundary = Boundary(
-        northEast = this.envelope.upperCorner.values.toVertex().first(),
-        southWest = this.envelope.lowerCorner.values.toVertex().first(),
+        northEast = this.envelope.upperCorner.value.toVertex().first(),
+        southWest = this.envelope.lowerCorner.value.toVertex().first(),
     )
 
     fun Boundary.toGmlBoundedBy(): WfsBoundedBy = WfsBoundedBy(
-        Envelope(lowerCorner = LowerCorner(this.southWest.toGml()), upperCorner = UpperCorner(this.northEast.toGml())),
+        Envelope(
+            lowerCorner = DirectPositionType(this.southWest.toGml()),
+            upperCorner = DirectPositionType(this.northEast.toGml())
+        ),
     )
 
     fun WfsBoundedBy.toBoundary(): Boundary? = this.envelope?.let {
         Boundary(
-            northEast = it.upperCorner.values.toVertex().first(),
-            southWest = it.lowerCorner.values.toVertex().first(),
+            northEast = it.upperCorner.value.toVertex().first(),
+            southWest = it.lowerCorner.value.toVertex().first(),
         )
     }
 

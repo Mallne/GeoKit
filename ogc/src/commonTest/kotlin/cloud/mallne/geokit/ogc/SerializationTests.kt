@@ -1,6 +1,7 @@
-import cloud.mallne.geokit.ogc.ParserTest
-import cloud.mallne.geokit.ogc.model.geometry.Geometry
-import cloud.mallne.geokit.ogc.model.geometry.MultiSurface
+package cloud.mallne.geokit.ogc
+
+import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType
+import cloud.mallne.geokit.ogc.model.gml.geometry.MultiSurface
 import cloud.mallne.geokit.ogc.model.wfs.FeatureCollection
 import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -47,7 +48,7 @@ class SerializationTests {
         val xml = XML {
             defaultPolicy { autoPolymorphic = true }
         }
-        val objs = xml.decodeFromString<Geometry>(
+        val objs = xml.decodeFromString<AbstractGeometryType>(
             ParserTest.GEOM,
         )
         println(objs)

@@ -23,7 +23,7 @@ geographic data formats and calculations.
 _The GeoJson Package is a repackaged version of `org.maplibre.spatialk:geojson` use this instead, if you want only a
 serializable GeoJson._
 
-### `gml`
+### `ogc`
 
 > A GML implementation for WFS services
 
@@ -31,6 +31,13 @@ serializable GeoJson._
 - WFS service support
 - GML parsing and generation
 - Geographic markup handling
+- This does not contain full Support for FES, GML and WFS yet
+- basically a Kotlin version of `GeoTools OGC`
+
+### `interop`
+
+> An interop layer between GeoJson and the OGC (mainly GML) Types
+> _These types do not map 1:1, so there are some implications converting between those_
 
 ### `coordinates`
 
