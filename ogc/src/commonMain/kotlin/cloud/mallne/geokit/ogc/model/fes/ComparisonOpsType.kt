@@ -3,4 +3,4 @@ package cloud.mallne.geokit.ogc.model.fes
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class ComparisonOpsType
+sealed class ComparisonOpsType : AbstractOperatorType

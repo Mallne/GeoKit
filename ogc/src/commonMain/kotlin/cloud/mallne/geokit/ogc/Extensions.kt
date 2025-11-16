@@ -11,7 +11,7 @@ import cloud.mallne.geokit.ogc.model.wfs.WfsBoundedBy
 object Extensions {
     fun Vertex.toGml(): List<Double> = listOf(latitude, longitude)
     fun List<Vertex>.toGml(): List<Double> = this.flatMap { it.toGml() }
-    fun List<Double>.toVertex(): List<Vertex> {
+    fun List<Double>.toVertices(): List<Vertex> {
         require(this.size % 2 == 0) {
             "Vertexlist must have an even number of values"
         }
@@ -27,6 +27,8 @@ object Extensions {
         return l
     }
 
+    fun List<Double>.toVertex(): Vertex? = this.toVertices().firstOrNull()
+
     fun Boundary.toGmlBBOX(): BBOX = BBOX(
         envelope = Envelope(
             lowerCorner = DirectPositionType(this.southWest.toGml()),
@@ -35,8 +37,8 @@ object Extensions {
     )
 
     fun BBOX.toBoundary(): Boundary = Boundary(
-        northEast = this.envelope.upperCorner.value.toVertex().first(),
-        southWest = this.envelope.lowerCorner.value.toVertex().first(),
+        northEast = this.envelope.upperCorner.value.toVertices().first(),
+        southWest = this.envelope.lowerCorner.value.toVertices().first(),
     )
 
     fun Boundary.toGmlBoundedBy(): WfsBoundedBy = WfsBoundedBy(
@@ -48,8 +50,8 @@ object Extensions {
 
     fun WfsBoundedBy.toBoundary(): Boundary? = this.envelope?.let {
         Boundary(
-            northEast = it.upperCorner.value.toVertex().first(),
-            southWest = it.lowerCorner.value.toVertex().first(),
+            northEast = it.upperCorner.value.toVertices().first(),
+            southWest = it.lowerCorner.value.toVertices().first(),
         )
     }
 

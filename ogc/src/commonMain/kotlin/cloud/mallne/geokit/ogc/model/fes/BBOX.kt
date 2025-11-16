@@ -10,9 +10,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 data class BBOX(
     /** Property path to apply the spatial filter against. Keep generic; default can be "*" or a geometry name. */
-    @XmlElement(true)
+    @XmlElement
     val valueReference: ValueReference? = null,
-    @XmlElement(true)
+    @XmlElement
     val envelope: Envelope
 ) : SpatialOpsType() {
     constructor(valueReference: String, envelope: Envelope) : this(ValueReference(valueReference), envelope)

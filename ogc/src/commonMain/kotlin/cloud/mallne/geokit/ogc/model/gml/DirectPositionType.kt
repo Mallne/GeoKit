@@ -1,5 +1,8 @@
 package cloud.mallne.geokit.ogc.model.gml
 
+import cloud.mallne.geokit.Vertex
+import cloud.mallne.geokit.ogc.Extensions.toVertex
+import cloud.mallne.geokit.ogc.Extensions.toVertices
 import cloud.mallne.geokit.ogc.SpaceSeparatedDoublesSerializer
 import cloud.mallne.geokit.ogc.SpaceSeparatedStringsSerializer
 import kotlinx.serialization.Serializable
@@ -16,4 +19,7 @@ data class DirectPositionType(
     val srsName: String? = null,
     @Serializable(with = SpaceSeparatedStringsSerializer::class)
     val uomLabels: List<String> = listOf(),
-)
+) {
+    fun toVertices(): List<Vertex> = value.toVertices()
+    fun toVertex(): Vertex? = value.toVertex()
+}

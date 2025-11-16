@@ -9,13 +9,13 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 data class Filter(
     @XmlElement
-    val statialOps: SpatialOpsType? = null,
+    val spatialOp: SpatialOpsType? = null,
     @XmlElement
-    val comparisonOps: ComparisonOpsType? = null,
+    val comparisonOp: ComparisonOpsType? = null,
     @XmlElement
-    val temporalOps: TemporalOpsType? = null,
+    val temporalOp: TemporalOpsType? = null,
     @XmlElement
-    val logicOps: LogicOpsType? = null,
+    val logicOp: LogicOpsType? = null,
     @XmlElement
-    val extensionOps: ExtensionOpsType? = null,
+    val extensionOp: ExtensionOpsType? = null,
 ) : AbstractSelectionClauseType()

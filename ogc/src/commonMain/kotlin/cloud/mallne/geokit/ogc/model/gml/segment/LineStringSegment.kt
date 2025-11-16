@@ -6,6 +6,7 @@ import cloud.mallne.geokit.ogc.model.gml.DirectPositionType
 import cloud.mallne.geokit.ogc.model.gml.member.PointMember
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @XmlSerialName("LineStringSegment", Namespaces.GML, Namespaces.Prefix.GML)
@@ -23,4 +24,8 @@ data class LineStringSegment(
     override val numDerivativeInterior: Int? = null,
     override val numDerivativesAtEnd: Int? = null,
     override val numDerivativesAtStart: Int? = null,
-) : AbstractCurveSegmentType()
+) : AbstractCurveSegmentType() {
+    @Transient
+    override val positions: List<DirectPositionType>
+        get() = pos + posList
+}

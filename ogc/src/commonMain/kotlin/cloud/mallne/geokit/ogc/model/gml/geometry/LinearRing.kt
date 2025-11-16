@@ -24,4 +24,7 @@ data class LinearRing(
     override val gid: String? = null,
     override val uomLabels: List<String> = listOf(),
     override val id: String? = null,
-) : AbstractRingType()
+) : AbstractRingType() {
+    val positions: List<DirectPositionType>
+        get() = pos + posList
+}

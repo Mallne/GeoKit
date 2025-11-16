@@ -19,4 +19,7 @@ sealed class Arc(
     override val numDerivativeInterior: Int? = null,
     override val numDerivativesAtEnd: Int? = null,
     override val numDerivativesAtStart: Int? = null
-) : AbstractCurveSegmentType()
+) : AbstractCurveSegmentType() {
+    override val positions: List<DirectPositionType>
+        get() = pos + posList
+}

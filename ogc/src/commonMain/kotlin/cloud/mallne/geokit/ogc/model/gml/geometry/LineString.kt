@@ -22,4 +22,7 @@ data class LineString(
     override val axisLabels: List<String> = listOf(),
     override val gid: String? = null,
     override val uomLabels: List<String> = listOf(),
-) : AbstractCurveType()
+) : AbstractCurveType() {
+    val positions: List<DirectPositionType>
+        get() = pos + posList
+}

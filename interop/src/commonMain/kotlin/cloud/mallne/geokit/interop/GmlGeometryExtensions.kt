@@ -2,12 +2,20 @@ package cloud.mallne.geokit.interop
 
 import cloud.mallne.geokit.geojson.*
 import cloud.mallne.geokit.geojson.CalculationInterop.toPosition
+import cloud.mallne.geokit.geojson.LineString
+import cloud.mallne.geokit.geojson.MultiLineString
+import cloud.mallne.geokit.geojson.MultiPoint
+import cloud.mallne.geokit.geojson.MultiPolygon
+import cloud.mallne.geokit.geojson.Point
+import cloud.mallne.geokit.geojson.Polygon
+import cloud.mallne.geokit.interop.GmlExtensions.toGeoJson
 import cloud.mallne.geokit.interop.GmlExtensions.toGml
-import cloud.mallne.geokit.interop.GmlGeometryExtensions.toGeoJson
-import cloud.mallne.geokit.ogc.model.gml.geometry.Curve
-import cloud.mallne.geokit.ogc.model.gml.geometry.LinearRing
-import cloud.mallne.geokit.ogc.model.gml.geometry.MultiSurface
-import cloud.mallne.geokit.ogc.model.gml.member.SurfaceMember
+import cloud.mallne.geokit.ogc.model.gml.AbstractRingPropertyType
+import cloud.mallne.geokit.ogc.model.gml.DirectPositionType
+import cloud.mallne.geokit.ogc.model.gml.geometry.*
+import cloud.mallne.geokit.ogc.model.gml.member.LineStringMember
+import cloud.mallne.geokit.ogc.model.gml.member.PointMember
+import cloud.mallne.geokit.ogc.model.gml.member.PolygonMember
 import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType as GmlGeometry
 import cloud.mallne.geokit.ogc.model.gml.geometry.LineString as GmlLineString
 import cloud.mallne.geokit.ogc.model.gml.geometry.MultiLineString as GmlMultiLineString
@@ -17,8 +25,100 @@ import cloud.mallne.geokit.ogc.model.gml.geometry.Point as GmlPoint
 import cloud.mallne.geokit.ogc.model.gml.geometry.Polygon as GmlPolygon
 
 object GmlGeometryExtensions {
+    // GML <-> GeoJSON conversions
+    // LineString <-> LineString
+    fun LineString.toGml(): GmlLineString = GmlLineString(posList = listOf(this.coordinates.toGml()))
+    fun GmlLineString.toGeoJson(): LineString = LineString(this.positions.toGeoJson().flatten())
+
+    //MultiLineString <-> MultiLineString
+    fun MultiLineString.toGml(): GmlMultiLineString =
+        GmlMultiLineString(lineStringMember = this.coordinates.map { LineStringMember(GmlLineString(listOf(it.toGml()))) })
+
+    fun GmlMultiLineString.toGeoJson(): MultiLineString =
+        MultiLineString(this.lineStringMember.map { it.lineString.positions.toGeoJson().flatten() })
+
+    //MultiPoint <-> MultiPoint
+    fun MultiPoint.toGml(): GmlMultiPoint = GmlMultiPoint(this.coordinates.map { PointMember(it.toGmlPoint()) })
+    fun GmlMultiPoint.toGeoJson(): MultiPoint = MultiPoint(this.pointMember.map { it.point.toGeoJsonPoint() })
+
+    //MultiPolygon <-> MultiPolygon
+    fun MultiPolygon.toGml(): GmlMultiPolygon =
+        GmlMultiPolygon(this.coordinates.map { lists ->
+            val dpt = lists.toGml()
+            PolygonMember(
+                GmlPolygon(
+                    exterior = AbstractRingPropertyType(LinearRing(posList = listOf(dpt.first()))),
+                    interior = if (dpt.size > 1) dpt.subList(1, dpt.size)
+                        .map { AbstractRingPropertyType(LinearRing(posList = listOf(it))) } else listOf()
+                )
+            )
+        })
+
+    fun GmlMultiPolygon.toGeoJson(): MultiPolygon =
+        MultiPolygon(this.polygonMember.map { polygonMember ->
+            polygonMember.polygon.toGeoJson().coordinates
+        })
+
+    //Point <-> Point
+    fun Point.toGml(): GmlPoint = GmlPoint(pos = this.coordinates.toGml())
+    fun GmlPoint.toGeoJson(): Point = Point(this.pos.toVertex()!!.toPosition())
+
+    //Polygon <-> Polygon
+    fun Polygon.toGml(): GmlPolygon {
+        val dpt = this.coordinates.toGml()
+        return GmlPolygon(
+            exterior = AbstractRingPropertyType(LinearRing(posList = listOf(dpt.first()))),
+            interior = if (dpt.size > 1) dpt.subList(1, dpt.size)
+                .map { AbstractRingPropertyType(LinearRing(posList = listOf(it))) } else listOf()
+        )
+    }
+
+    fun GmlPolygon.toGeoJson(): Polygon {
+        // 1. Extract exterior ring coordinates
+        val exteriorCoords = this.exterior.ring.extractCoordinates().toGeoJson().flatten()
+
+        // 2. Extract and map all interior ring coordinates
+        val interiorCoords = this.interior.map { it.ring.extractCoordinates().toGeoJson() }.flatten()
+
+        // 3. Build the final GeoJSON structure: [ [exterior], [interior1], [interior2], ... ]
+        val allRings = mutableListOf<List<Position>>()
+        allRings.add(exteriorCoords)
+        allRings.addAll(interiorCoords)
+
+        return Polygon(allRings)
+    }
+
+    private fun AbstractRingType.extractCoordinates() = when (this) {
+        is LinearRing -> this.positions
+        is Ring -> this.curveMember.map { it.curve.extractCoordinates() }.flatten()
+    }
+
+    private fun AbstractCurveType.extractCoordinates() = when (this) {
+        is Curve -> this.segments.segments.map { it.positions }.flatten()
+        is GmlLineString -> this.positions
+    }
+
+    //Curve -> LineString
+    fun Curve.toGeoJson(): LineString = LineString(this.extractCoordinates().toGeoJson().flatten())
+
+    //MultiCurve -> MultiLineString
+    fun MultiCurve.toGeoJson(): MultiLineString =
+        MultiLineString(this.curveMember.map { it.curve.extractCoordinates().toGeoJson().flatten() })
+
+    //LinearRing -> Polygon
+    fun LinearRing.toGeoJson(): Polygon = Polygon(this.positions.toGeoJson().flatten())
+    //Ring -> Polygon
+    fun Ring.toGeoJson(): Polygon = Polygon(this.curveMember.map { it.curve.extractCoordinates().toGeoJson() }.flatten())
+
+    // MultiSurface -> MultiPolygon
+    fun MultiSurface.toGeoJson(): MultiPolygon = MultiPolygon(this.surfaceMember.map { it.surface.extractCoordinates().flatten().toGeoJson() })
+
+    private fun AbstractSurfaceType.extractCoordinates() = when (this) {
+        is GmlPolygon -> listOf(this.exterior.ring.extractCoordinates()) + this.interior.map { it.ring.extractCoordinates() }
+    }
+
     fun Geometry.toGml(): GmlGeometry = when (this) {
-        is GeometryCollection<*> -> this.toGml()
+        is GeometryCollection<*> -> TODO("Converting from a GeometryCollection is not yet supported!")
         is LineString -> this.toGml()
         is MultiLineString -> this.toGml()
         is MultiPoint -> this.toGml()
@@ -36,72 +136,14 @@ object GmlGeometryExtensions {
         is GmlPoint -> this.toGeoJson()
         is GmlPolygon -> this.toGeoJson()
         is Curve -> this.toGeoJson()
+        is MultiCurve -> this.toGeoJson()
+        is LinearRing -> this.toGeoJson()
+        is Ring -> this.toGeoJson()
     }
 
-    /**
-     * The GML Curve to GeoJSON LineString converter function.
-     */
-    fun Curve.toGeoJson(): LineString {
-        // A Curve is converted by flattening the coordinates of all its constituent segments.
-        val flattenedCoords = this.segments.segments.flatMap { segment ->
-            segment.posList.toGeoJson()
-        }
-        return LineString(flattenedCoords)
-    }
-
-    fun GeometryCollection<*>.toGml(): MultiSurface =
-        MultiSurface(surfaceMembers = this.geometries.map { SurfaceMember(it.toGml()) })
-
-    fun MultiSurface.toGeoJson(): MultiPolygon =
-        MultiPolygon(geometries = this.surfaceMembers.map { it.geometry.toGeoJson() })
-
-    fun LineString.toGml(): GmlLineString = GmlLineString(posList = this.coordinates.toGml())
-    fun GmlLineString.toGeoJson(): LineString = LineString(this.posList.toGeoJson())
-    fun MultiLineString.toGml(): GmlMultiLineString =
-        GmlMultiLineString(lineStringMember = this.coordinates.map { GmlLineString(posList = it.toGml()) })
-
-    fun GmlMultiLineString.toGeoJson(): MultiLineString =
-        MultiLineString(this.lineStringMember.map { it.posList.toGeoJson() })
-
-    fun MultiPoint.toGml(): GmlMultiPoint = GmlMultiPoint(this.coordinates.map { it.toGmlPoint() })
-    fun GmlMultiPoint.toGeoJson(): MultiPoint = MultiPoint(this.pointMember.map { it.toGeoJsonPoint() })
-    fun MultiPolygon.toGml(): GmlMultiPolygon =
-        GmlMultiPolygon(this.coordinates.map { lists ->
-            GmlPolygon(
-                exterior = Exterior(LinearRing(lists.first().toGml())),
-                interior = if (lists.size > 1) Interior(
-                    lists.subList(1, lists.size).map { LinearRing(it.toGml()) }) else Interior()
-            )
-        })
-
-    fun GmlMultiPolygon.toGeoJson(): MultiPolygon =
-        MultiPolygon(this.polygonMember.map { polygon ->
-            polygon.toGeoJson().coordinates
-        })
-
-    fun Point.toGml(): GmlPoint = GmlPoint(pos = this.coordinates.toGml())
-    fun GmlPoint.toGeoJson(): Point = Point(this.vertex.toPosition())
-    fun Polygon.toGml(): GmlPolygon = GmlPolygon(
-        exterior = Exterior(LinearRing(this.coordinates.first().toGml())),
-        interior = if (this.coordinates.size > 1) Interior(
-            this.coordinates.subList(1, this.coordinates.size).map { LinearRing(it.toGml()) }) else Interior()
-    )
-
-    fun GmlPolygon.toGeoJson(): Polygon {
-        // 1. Extract exterior ring coordinates
-        val exteriorCoords = this.exterior.ring.extractCoordinates().toGeoJson()
-
-        // 2. Extract and map all interior ring coordinates
-        val interiorCoords = this.interior.rings.map { it.extractCoordinates().toGeoJson() }
-
-        // 3. Build the final GeoJSON structure: [ [exterior], [interior1], [interior2], ... ]
-        val allRings = mutableListOf<List<Position>>()
-        allRings.add(exteriorCoords)
-        allRings.addAll(interiorCoords)
-
-        return Polygon(allRings)
-    }
+    fun DirectPositionType.toGeoJson(): List<Position> = this.value.toGeoJson()
+    fun List<DirectPositionType>.toGeoJson(): List<List<Position>> = this.map { it.toGeoJson() }
 
     fun Position.toGmlPoint(): GmlPoint = GmlPoint(pos = this.toGml())
-    fun GmlPoint.toGeoJsonPoint(): Position = this.vertex.toPosition()
+    fun GmlPoint.toGeoJsonPoint(): Position = this.pos.toVertex()!!.toPosition()
 }

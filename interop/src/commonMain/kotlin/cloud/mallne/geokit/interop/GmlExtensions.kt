@@ -1,10 +1,14 @@
 package cloud.mallne.geokit.interop
 
 import cloud.mallne.geokit.geojson.Position
+import cloud.mallne.geokit.ogc.model.gml.DirectPositionType
 
 object GmlExtensions {
-    fun Position.toGml(): List<Double> = listOf(latitude, longitude)
-    fun List<Position>.toGml(): List<Double> = this.flatMap { it.toGml() }
+    fun Position.toGmlPrimitive(): List<Double> = listOf(latitude, longitude)
+    fun List<Position>.toGmlPrimitive(): List<Double> = this.flatMap { it.toGmlPrimitive() }
+    fun Position.toGml(): DirectPositionType = DirectPositionType(this.toGmlPrimitive())
+    fun List<Position>.toGml(): DirectPositionType = DirectPositionType(this.toGmlPrimitive())
+    fun List<List<Position>>.toGml(): List<DirectPositionType> = this.map{it.toGml()}
     fun List<Double>.toGeoJson(): List<Position> {
         require(this.size % 2 == 0) {
             "Vertexlist must have an even number of values"
