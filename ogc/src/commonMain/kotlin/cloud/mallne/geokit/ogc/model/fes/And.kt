@@ -21,4 +21,29 @@ data class And(
     @XmlElement
     override val extensionOps: List<ExtensionOpsType> = listOf(),
 ): BinaryLogicOpType() {
+    companion object {
+        fun fromList(operators: List<AbstractOperatorType>): And {
+            val spatialOps = mutableListOf<SpatialOpsType>()
+            val comparisonOps = mutableListOf<ComparisonOpsType>()
+            val temporalOps = mutableListOf<TemporalOpsType>()
+            val logicOps = mutableListOf<LogicOpsType>()
+            val extensionOps = mutableListOf<ExtensionOpsType>()
+            for (operator in operators) {
+                when (operator) {
+                    is SpatialOpsType -> spatialOps.add(operator)
+                    is ComparisonOpsType -> comparisonOps.add(operator)
+                    is TemporalOpsType -> temporalOps.add(operator)
+                    is LogicOpsType -> logicOps.add(operator)
+                    is ExtensionOpsType -> extensionOps.add(operator)
+                }
+            }
+            return And(
+                spatialOps = spatialOps,
+                comparisonOps = comparisonOps,
+                temporalOps = temporalOps,
+                logicOps = logicOps,
+                extensionOps = extensionOps
+            )
+        }
+    }
 }
