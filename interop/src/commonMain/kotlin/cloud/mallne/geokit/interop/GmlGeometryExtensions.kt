@@ -2,20 +2,24 @@ package cloud.mallne.geokit.interop
 
 import cloud.mallne.geokit.geojson.*
 import cloud.mallne.geokit.geojson.CalculationInterop.toPosition
-import cloud.mallne.geokit.geojson.LineString
-import cloud.mallne.geokit.geojson.MultiLineString
-import cloud.mallne.geokit.geojson.MultiPoint
-import cloud.mallne.geokit.geojson.MultiPolygon
-import cloud.mallne.geokit.geojson.Point
-import cloud.mallne.geokit.geojson.Polygon
 import cloud.mallne.geokit.interop.GmlExtensions.toGeoJson
 import cloud.mallne.geokit.interop.GmlExtensions.toGml
+import cloud.mallne.geokit.interop.GmlGeometryExtensions.toGml
 import cloud.mallne.geokit.ogc.model.gml.AbstractRingPropertyType
 import cloud.mallne.geokit.ogc.model.gml.DirectPositionType
 import cloud.mallne.geokit.ogc.model.gml.geometry.*
 import cloud.mallne.geokit.ogc.model.gml.member.LineStringMember
 import cloud.mallne.geokit.ogc.model.gml.member.PointMember
 import cloud.mallne.geokit.ogc.model.gml.member.PolygonMember
+import org.maplibre.spatialk.geojson.Geometry
+import org.maplibre.spatialk.geojson.GeometryCollection
+import org.maplibre.spatialk.geojson.LineString
+import org.maplibre.spatialk.geojson.MultiLineString
+import org.maplibre.spatialk.geojson.MultiPoint
+import org.maplibre.spatialk.geojson.MultiPolygon
+import org.maplibre.spatialk.geojson.Point
+import org.maplibre.spatialk.geojson.Polygon
+import org.maplibre.spatialk.geojson.Position
 import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType as GmlGeometry
 import cloud.mallne.geokit.ogc.model.gml.geometry.LineString as GmlLineString
 import cloud.mallne.geokit.ogc.model.gml.geometry.MultiLineString as GmlMultiLineString
@@ -107,11 +111,14 @@ object GmlGeometryExtensions {
 
     //LinearRing -> Polygon
     fun LinearRing.toGeoJson(): Polygon = Polygon(this.positions.toGeoJson().flatten())
+
     //Ring -> Polygon
-    fun Ring.toGeoJson(): Polygon = Polygon(this.curveMember.map { it.curve.extractCoordinates().toGeoJson() }.flatten())
+    fun Ring.toGeoJson(): Polygon =
+        Polygon(this.curveMember.map { it.curve.extractCoordinates().toGeoJson() }.flatten())
 
     // MultiSurface -> MultiPolygon
-    fun MultiSurface.toGeoJson(): MultiPolygon = MultiPolygon(this.surfaceMember.map { it.surface.extractCoordinates().flatten().toGeoJson() })
+    fun MultiSurface.toGeoJson(): MultiPolygon =
+        MultiPolygon(this.surfaceMember.map { it.surface.extractCoordinates().flatten().toGeoJson() })
 
     private fun AbstractSurfaceType.extractCoordinates() = when (this) {
         is GmlPolygon -> listOf(this.exterior.ring.extractCoordinates()) + this.interior.map { it.ring.extractCoordinates() }

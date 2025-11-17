@@ -2,6 +2,9 @@ package cloud.mallne.geokit.geojson
 
 import cloud.mallne.geokit.Boundary
 import cloud.mallne.geokit.Vertex
+import org.maplibre.spatialk.geojson.BoundingBox
+import org.maplibre.spatialk.geojson.Point
+import org.maplibre.spatialk.geojson.Position
 
 object CalculationInterop {
     fun Position.toVertex() = Vertex(latitude, longitude)

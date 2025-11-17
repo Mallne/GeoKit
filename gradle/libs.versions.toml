@@ -28,6 +28,7 @@ postgres = "1.1.1.RELEASE"
 serialization = "1.9.0"
 version-catalog-update-v = "1.0.1"
 xmlutil = "0.91.3"
+mapLibre-spatialk = "0.6.1"
 
 [libraries]
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
@@ -81,6 +82,7 @@ mlln-units = { module = "cloud.mallne:units", version.ref = "mlln-units" }
 postgres = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgres" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 xmlutil-serialization-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
+maplibre-spatialk = { module = "org.maplibre.spatialk:geojson", version.ref = "mapLibre-spatialk" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

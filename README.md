@@ -20,8 +20,7 @@ geographic data formats and calculations.
 
 > A GeoJson implementation based on kotlinx.serialization
 
-_The GeoJson Package is a repackaged version of `org.maplibre.spatialk:geojson` use this instead, if you want only a
-serializable GeoJson._
+_The GeoJson Package provides interop for the Maplibre SpatialK GeoJson Models._
 
 ### `ogc`
 

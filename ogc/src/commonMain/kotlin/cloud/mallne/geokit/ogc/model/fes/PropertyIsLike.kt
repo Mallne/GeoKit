@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
-@SerialName("PropertyIsBetween")
-@XmlSerialName("PropertyIsBetween", Namespaces.FES, Namespaces.Prefix.FES)
+@SerialName("PropertyIsLike")
+@XmlSerialName("PropertyIsLike", Namespaces.FES, Namespaces.Prefix.FES)
 data class PropertyIsLike(
     val valueReference: ValueReference,
     val literal: Literal,
