@@ -1,25 +1,21 @@
 package cloud.mallne.geokit.interop
 
-import cloud.mallne.geokit.geojson.*
 import cloud.mallne.geokit.geojson.CalculationInterop.toPosition
 import cloud.mallne.geokit.interop.GmlExtensions.toGeoJson
 import cloud.mallne.geokit.interop.GmlExtensions.toGml
-import cloud.mallne.geokit.interop.GmlGeometryExtensions.toGml
-import cloud.mallne.geokit.ogc.model.gml.AbstractRingPropertyType
 import cloud.mallne.geokit.ogc.model.gml.DirectPositionType
+import cloud.mallne.geokit.ogc.model.gml.RingPropertyType
 import cloud.mallne.geokit.ogc.model.gml.geometry.*
 import cloud.mallne.geokit.ogc.model.gml.member.LineStringMember
 import cloud.mallne.geokit.ogc.model.gml.member.PointMember
 import cloud.mallne.geokit.ogc.model.gml.member.PolygonMember
-import org.maplibre.spatialk.geojson.Geometry
-import org.maplibre.spatialk.geojson.GeometryCollection
+import org.maplibre.spatialk.geojson.*
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.MultiLineString
 import org.maplibre.spatialk.geojson.MultiPoint
 import org.maplibre.spatialk.geojson.MultiPolygon
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Polygon
-import org.maplibre.spatialk.geojson.Position
 import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType as GmlGeometry
 import cloud.mallne.geokit.ogc.model.gml.geometry.LineString as GmlLineString
 import cloud.mallne.geokit.ogc.model.gml.geometry.MultiLineString as GmlMultiLineString
@@ -51,9 +47,9 @@ object GmlGeometryExtensions {
             val dpt = lists.toGml()
             PolygonMember(
                 GmlPolygon(
-                    exterior = AbstractRingPropertyType(LinearRing(posList = listOf(dpt.first()))),
+                    exterior = RingPropertyType(LinearRing(posList = listOf(dpt.first()))),
                     interior = if (dpt.size > 1) dpt.subList(1, dpt.size)
-                        .map { AbstractRingPropertyType(LinearRing(posList = listOf(it))) } else listOf()
+                        .map { RingPropertyType(LinearRing(posList = listOf(it))) } else listOf()
                 )
             )
         })
@@ -71,9 +67,9 @@ object GmlGeometryExtensions {
     fun Polygon.toGml(): GmlPolygon {
         val dpt = this.coordinates.toGml()
         return GmlPolygon(
-            exterior = AbstractRingPropertyType(LinearRing(posList = listOf(dpt.first()))),
+            exterior = RingPropertyType(LinearRing(posList = listOf(dpt.first()))),
             interior = if (dpt.size > 1) dpt.subList(1, dpt.size)
-                .map { AbstractRingPropertyType(LinearRing(posList = listOf(it))) } else listOf()
+                .map { RingPropertyType(LinearRing(posList = listOf(it))) } else listOf()
         )
     }
 
@@ -98,7 +94,7 @@ object GmlGeometryExtensions {
     }
 
     private fun AbstractCurveType.extractCoordinates() = when (this) {
-        is Curve -> this.segments.segments.map { it.positions }.flatten()
+        is Curve -> this.segments.map { it.positions }.flatten()
         is GmlLineString -> this.positions
     }
 
@@ -118,10 +114,18 @@ object GmlGeometryExtensions {
 
     // MultiSurface -> MultiPolygon
     fun MultiSurface.toGeoJson(): MultiPolygon =
-        MultiPolygon(this.surfaceMember.map { it.surface.extractCoordinates().flatten().toGeoJson() })
+        MultiPolygon(this.surfaceMember.map { it.surface.extractCoordinates().toGeoJson() })
 
     private fun AbstractSurfaceType.extractCoordinates() = when (this) {
-        is GmlPolygon -> listOf(this.exterior.ring.extractCoordinates()) + this.interior.map { it.ring.extractCoordinates() }
+        is GmlPolygon -> listOfNotNull(this.exterior.ring.extractCoordinates().condense()) + this.interior.mapNotNull {
+            it.ring.extractCoordinates().condense()
+        }
+    }
+
+    private fun List<DirectPositionType>.condense(): DirectPositionType? {
+        val pos = this.flatMap { it.value }
+        val first = this.firstOrNull()
+        return first?.copy(value = pos)
     }
 
     fun Geometry.toGml(): GmlGeometry = when (this) {
