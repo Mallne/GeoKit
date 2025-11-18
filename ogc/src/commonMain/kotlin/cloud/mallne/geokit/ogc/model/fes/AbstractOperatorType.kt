@@ -1,4 +1,3 @@
 package cloud.mallne.geokit.ogc.model.fes
 
-sealed interface AbstractOperatorType {
-}
+sealed interface AbstractOperatorType
