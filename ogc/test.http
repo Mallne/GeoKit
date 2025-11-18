@@ -1,5 +1,5 @@
 ### WFS 2.0.0 GET Request (KVP BBOX Filter - OGC Compliant Y, X Order)
-@feature_type = ave:Flurstueck
+@feature_type = nora:v_al_flurstueck
 @version = 2.0.0
 @crs_urn = urn:ogc:def:crs:EPSG::4326
 @max_features = 10
@@ -45,18 +45,11 @@ Content-Type: application/xml
 </wfs:GetFeature>
 
 ### TEST
-POST https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs
+POST https://owsproxy.lgl-bw.de/owsproxy/wfs/WFS_LGL-BW_ALKIS
 Content-Type: application/xml
 
 <wfs:GetFeature xmlns:wfs="http://www.opengis.net/wfs/2.0" service="WFS" version="2.0.0" count="20">
-    <wfs:Query typeNames="ave:Flurstueck" srsName="urn:ogc:def:crs:EPSG::4326">
-        <fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0">
-            <fes:BBOX>
-                <gml:Envelope xmlns:gml="http://www.opengis.net/gml/3.2" srsName="urn:ogc:def:crs:EPSG::4326">
-                    <gml:lowerCorner>50.9529 11.0650</gml:lowerCorner>
-                    <gml:upperCorner>50.9593 11.0702</gml:upperCorner>
-                </gml:Envelope>
-            </fes:BBOX>
-        </fes:Filter>
+    <wfs:Query typeNames="nora:v_al_flurstueck" srsName="urn:ogc:def:crs:EPSG::4326">
+
     </wfs:Query>
 </wfs:GetFeature>

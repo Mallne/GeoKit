@@ -23,6 +23,7 @@ data class LinearRing(
     override val axisLabels: List<String> = listOf(),
     override val gid: String? = null,
     override val uomLabels: List<String> = listOf(),
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
 ) : AbstractRingType() {
     val positions: List<DirectPositionType>

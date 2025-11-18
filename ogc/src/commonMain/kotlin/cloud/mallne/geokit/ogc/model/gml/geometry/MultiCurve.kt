@@ -12,6 +12,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class MultiCurve(
     val curveMember: List<CurveMember>,
     override val srsName: String? = null,
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
     override val srsDimension: Int? = null,
     override val axisLabels: List<String> = listOf(),

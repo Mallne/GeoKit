@@ -12,6 +12,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 data class Ring(
     val curveMember: List<CurveMember>,
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
     override val srsName: String? = null,
     override val srsDimension: Int? = null,

@@ -17,6 +17,7 @@ data class LineString(
     @SerialName("posList")
     val posList: List<DirectPositionType> = listOf(),
     override val srsName: String? = null,
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
     override val srsDimension: Int? = null,
     override val axisLabels: List<String> = listOf(),

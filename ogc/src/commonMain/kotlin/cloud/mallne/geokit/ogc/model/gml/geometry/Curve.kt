@@ -8,9 +8,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("Curve", Namespaces.GML, Namespaces.Prefix.GML)
 @Serializable
 data class Curve(
-    @XmlSerialName("segments", Namespaces.GML, Namespaces.Prefix.GML)
     val segments: CurveSegments,
     override val srsName: String? = null,
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
     override val srsDimension: Int? = null,
     override val axisLabels: List<String> = listOf(),

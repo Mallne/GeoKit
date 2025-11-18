@@ -894,4 +894,137 @@ object ParserTest {
                             </gml:exterior>
                         </gml:Polygon>
     """.trimIndent()
+
+    val CURVE = """
+                <gml:MultiSurface xmlns:gml="${Namespaces.GML}" gml:id="Flurstueck_DETHL51P0000UxmMFL_AVE_GEOMETRIE"
+                                  srsName="urn:ogc:def:crs:EPSG::4326">
+                    <gml:surfaceMember>
+                        <gml:Polygon gml:id="GEOMETRY_dbe53c73-95bd-43b6-a2f3-dd935d9bb1f9"
+                                     srsName="urn:ogc:def:crs:EPSG::4326">
+                            <gml:exterior>
+                                <gml:Ring>
+                                    <gml:curveMember>
+                                        <gml:Curve gml:id="GEOMETRY_025b2ef8-f7d5-47cd-996c-648889ab6640"
+                                                   srsName="urn:ogc:def:crs:EPSG::4326">
+                                            <gml:segments>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956877 11.064566 50.956884 11.064540</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956884 11.064540 50.956938 11.064336</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956938 11.064336 50.956984 11.064161</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956984 11.064161 50.956996 11.064113</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956996 11.064113 50.957036 11.063959</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957036 11.063959 50.957077 11.063804</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957077 11.063804 50.957117 11.063650</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957117 11.063650 50.957166 11.063462</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957166 11.063462 50.957153 11.063455</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957153 11.063455 50.957096 11.063425</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957096 11.063425 50.957069 11.063411</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:Arc>
+                                                    <gml:posList>50.957069 11.063411 50.957086 11.063441 50.957086
+                                                        11.063481
+                                                    </gml:posList>
+                                                </gml:Arc>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957086 11.063481 50.957025 11.063716</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.957025 11.063716 50.956973 11.063899</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956973 11.063899 50.956915 11.064108</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956915 11.064108 50.956855 11.064330</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956855 11.064330 50.956808 11.064509</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956808 11.064509 50.956757 11.064703</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956757 11.064703 50.956709 11.064889</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956709 11.064889 50.956662 11.065072</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956662 11.065072 50.956619 11.065241</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956619 11.065241 50.956565 11.065455</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:Arc>
+                                                    <gml:posList>50.956565 11.065455 50.956531 11.065513 50.956489
+                                                        11.065555
+                                                    </gml:posList>
+                                                </gml:Arc>
+                                                <gml:Arc>
+                                                    <gml:posList>50.956489 11.065555 50.956463 11.065570 50.956436
+                                                        11.065580
+                                                    </gml:posList>
+                                                </gml:Arc>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956436 11.065580 50.956483 11.065604</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956483 11.065604 50.956550 11.065638</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956550 11.065638 50.956568 11.065647</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956568 11.065647 50.956636 11.065425</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956636 11.065425 50.956660 11.065345</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956660 11.065345 50.956682 11.065268</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956682 11.065268 50.956692 11.065238</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956692 11.065238 50.956702 11.065202</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956702 11.065202 50.956766 11.064994</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956766 11.064994 50.956830 11.064746</gml:posList>
+                                                </gml:LineStringSegment>
+                                                <gml:LineStringSegment interpolation="linear">
+                                                    <gml:posList>50.956830 11.064746 50.956877 11.064566</gml:posList>
+                                                </gml:LineStringSegment>
+                                            </gml:segments>
+                                        </gml:Curve>
+                                    </gml:curveMember>
+                                </gml:Ring>
+                            </gml:exterior>
+                        </gml:Polygon>
+                    </gml:surfaceMember>
+                </gml:MultiSurface>
+    """.trimIndent()
 }

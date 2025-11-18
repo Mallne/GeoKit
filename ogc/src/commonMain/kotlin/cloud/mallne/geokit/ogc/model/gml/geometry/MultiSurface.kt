@@ -16,6 +16,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class MultiSurface(
     override val srsName: String? = null,
     val surfaceMember: List<SurfaceMember> = emptyList(),
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
     override val srsDimension: Int?,
     override val axisLabels: List<String>,

@@ -7,12 +7,14 @@ import cloud.mallne.geokit.ogc.model.gml.member.PointMember
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @XmlSerialName("LineStringSegment", Namespaces.GML, Namespaces.Prefix.GML)
 @SerialName("LineStringSegment")
 @Serializable
 data class LineStringSegment(
+    @XmlElement(false)
     val interpolation: CurveInterpolationType? = null,
     @XmlSerialName("pos", Namespaces.GML, Namespaces.Prefix.GML)
     @SerialName("pos")

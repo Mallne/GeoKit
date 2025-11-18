@@ -9,7 +9,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("Arc", Namespaces.GML, Namespaces.Prefix.GML)
 @SerialName("Arc")
-sealed class Arc(
+data class Arc(
     @XmlSerialName("pos", Namespaces.GML, Namespaces.Prefix.GML)
     @SerialName("pos")
     val pos: List<DirectPositionType> = listOf(),

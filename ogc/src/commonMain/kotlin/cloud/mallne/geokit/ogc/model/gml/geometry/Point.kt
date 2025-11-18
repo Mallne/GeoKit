@@ -14,6 +14,7 @@ data class Point(
     @SerialName("pos")
     val pos: DirectPositionType,
     override val srsName: String? = null,
+    @XmlSerialName("id", namespace = Namespaces.GML, prefix = Namespaces.Prefix.GML)
     override val id: String? = null,
     override val srsDimension: Int? = null,
     override val axisLabels: List<String> = listOf(),
