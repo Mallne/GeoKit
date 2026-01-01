@@ -23,4 +23,8 @@ data class PointCloud(
     override fun listIterator(): ListIterator<Vertex> = points.listIterator()
     override fun listIterator(index: Int): ListIterator<Vertex> = points.listIterator(index)
     override fun subList(fromIndex: Int, toIndex: Int): List<Vertex> = points.subList(fromIndex, toIndex)
+
+    companion object {
+        fun List<PointCloud>.condense() = PointCloud(flatten())
+    }
 }
