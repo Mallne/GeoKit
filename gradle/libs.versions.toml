@@ -1,11 +1,11 @@
 [versions]
 # @pin
-agp = "8.12.3"
+agp = "9.0.0"
 # @keep
 android-compileSdk = "36"
 # @keep
 android-minSdk = "24"
-antlr = "1.0.8"
+antlr = "1.0.9"
 jetbrains-annotations = "26.0.2-1"
 ben-manes-versions-v = "0.53.0"
 dc-areaassist = "1.0.0-SNAPSHOT"
@@ -13,16 +13,16 @@ dc-aviator = "1.0.0-SNAPSHOT"
 dc-polyfill = "1.0.0-SNAPSHOT"
 dc-synapse = "0.0.1"
 dc-weaver = "1.0.0-SNAPSHOT"
-dependency-analysis-v = "3.4.1"
+dependency-analysis-v = "3.5.1"
 exposed-version = "0.61.0"
 koin = "4.1.1"
 koin-annotations = "2.3.1"
-kotlin = "2.2.21"
-kotlinx-datetime = "0.7.1"
-ksp = "2.3.2"
-ktor = "3.3.2"
-logback-version = "1.5.21"
-mcp = "0.7.7"
+kotlin = "2.3.0"
+kotlinx-datetime = "0.7.1-0.6.x-compat"
+ksp = "2.3.4"
+ktor = "3.3.3"
+logback-version = "1.5.25"
+mcp = "0.8.1"
 mlln-units = "1.0.0-SNAPSHOT"
 postgres = "1.1.1.RELEASE"
 serialization = "1.9.0"
@@ -96,5 +96,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
-mavenPublish = "com.vanniktech.maven.publish:0.35.0"
+mavenPublish = "com.vanniktech.maven.publish:0.36.0"
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update-v" }
