@@ -122,6 +122,9 @@ object GeokitMeasurement {
     }
 
     fun bbox(resultCoords: List<Vertex>): Boundary {
+        if (resultCoords.isEmpty()) {
+            return Boundary(north = 0.0, east = 0.0, south = 0.0, west = 0.0)
+        }
         var minLon = GeokitConstants.MAX_LONGITUDE
         var minLat = GeokitConstants.MAX_LATITUDE
         var maxLon = GeokitConstants.MIN_LONGITUDE
@@ -135,7 +138,7 @@ object GeokitMeasurement {
             maxLat = max(maxLat, lat)
             maxLon = max(maxLon, lon)
         }
-        return Boundary(maxLat, maxLon, minLat, minLon)
+        return Boundary(north = maxLat, east = maxLon, south = minLat, west = minLon)
     }
 
     fun center(bounds: Boundary): Vertex {

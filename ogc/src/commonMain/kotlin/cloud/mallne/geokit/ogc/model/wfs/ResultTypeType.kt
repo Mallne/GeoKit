@@ -1,9 +1,12 @@
 package cloud.mallne.geokit.ogc.model.wfs
 
+import kotlinx.serialization.Serializable
+
 /**
  * A representation of the literals of the enumeration '***Result Type Type***',
  * and utility methods for working with them.
  */
+@Serializable
 enum class ResultTypeType(
     val value: Int, val named: String, val literal: String
 ) {

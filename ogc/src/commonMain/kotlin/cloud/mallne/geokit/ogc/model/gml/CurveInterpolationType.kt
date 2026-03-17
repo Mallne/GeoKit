@@ -2,6 +2,7 @@ package cloud.mallne.geokit.ogc.model.gml
 
 import cloud.mallne.geokit.ogc.Namespaces
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 /**
@@ -14,6 +15,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
  */
 @SerialName(value = "interpolation")
 @XmlSerialName("interpolation", Namespaces.GML, Namespaces.Prefix.GML)
+@Serializable
 enum class CurveInterpolationType(
     val value: Int, val named: String, val literal: String
 ) {

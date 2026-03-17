@@ -1,5 +1,8 @@
 package cloud.mallne.geokit.ogc.model.wfs
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class ResolveValueType(
     val value: Int, val named: String, val literal: String
 ) {
