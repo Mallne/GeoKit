@@ -1,0 +1,94 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    alias(libs.plugins.kmp)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+group = "cloud.mallne.geokit"
+version = "1.0.0-SNAPSHOT"
+
+kotlin {
+    jvm()
+    android {
+        namespace = "${project.group}.fwi"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
+    js {
+        nodejs()
+        browser()
+    }
+    wasmJs {
+        browser()
+        nodejs()
+        d8()
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    linuxX64()
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(libs.kotlinx.serialization.json)
+                api(libs.mlln.units)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.kermit)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+    }
+    jvmToolchain(21)
+}
+
+mavenPublishing {
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                groupId = project.group.toString()
+                artifactId = project.name
+                version = project.version.toString()
+
+                pom {
+                    name = "GeoKit FWI"
+                    inceptionYear = "2026"
+                    developers {
+                        developer {
+                            name = "Mallne"
+                            url = "mallne.cloud"
+                        }
+                    }
+                }
+                repositories {
+                    maven {
+                        url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
+                        credentials {
+                            username = properties["dc.username"] as String?
+                            password = properties["dc.password"] as String?
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    signAllPublications()
+
+    coordinates(group.toString(), project.name, version.toString())
+}

@@ -13,7 +13,8 @@ WKT-CRS transformations.
 ## 🚀 Key Features
 
 * **📐 Turf-like Math:** Geometric calculations, distance measurements, and vector operations.
-* **🌐 Multi-module Design:** Only use what you need (`calculation`, `geojson`, `ogc`, `coordinates`).
+* **🔥 Fire Weather Index:** Hourly FWI calculations (FFMC, DMC, DC, ISI, BUI, FWI) with strict parity to NRCan/CFS reference implementation.
+* **🌐 Multi-module Design:** Only use what you need (`calculation`, `geojson`, `ogc`, `coordinates`, `fwi`).
 * **🛠️ CRS Transformations:** Parse WKT-CRS and perform coordinate conversions (e.g., EPSG:4326 to EPSG:25832).
 * **📦 GeoJSON & GML:** First-class support for industry-standard formats via `kotlinx.serialization`.
 * **🏗️ Kotlin Multiplatform:** Targets JVM, Android, JS, WasmJS, iOS, and Linux.
@@ -74,6 +75,33 @@ GML and WFS (Web Feature Service) implementation. Handles XML parsing and genera
 
 The "glue" module that maps between GeoJSON models and OGC/GML types.
 
+### 6. `fwi`
+
+Hourly Fire Weather Index (FWI) system. A strict Kotlin Multiplatform port of the NRCan/CFS Python reference (NG_FWI.py).
+
+```kotlin
+val weatherStream = listOf(
+    WeatherRow.Input(
+        id = "STATION1",
+        date = LocalDate(2023, 7, 1),
+        hr = 12,
+        temp = 25.5,
+        rh = 40.0,
+        ws = 15.0,
+        prec = 0.0,
+        lat = 45.0,
+        long = -75.0,
+        timezone = -5.0
+    )
+)
+
+val processed = FireWeatherIndex(weatherStream)
+val result = processed.first()
+
+println("FWI: ${result.fwi}")
+println("FFMC: ${result.ffmc}")
+```
+
 ---
 
 ## 🛠 Installation
@@ -89,6 +117,7 @@ repositories {
 dependencies {
     implementation("cloud.mallne.geokit:calculation:1.0.0-SNAPSHOT")
     implementation("cloud.mallne.geokit:geojson:1.0.0-SNAPSHOT")
+    implementation("cloud.mallne.geokit:fwi:1.0.0-SNAPSHOT")
     // ... other modules
 }
 ```

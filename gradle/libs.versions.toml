@@ -9,7 +9,8 @@ antlr = "1.0.10"
 ben-manes-versions-v = "0.54.0"
 dependency-analysis-v = "3.10.0"
 kotlin = "2.3.21"
-kotlinx-datetime = "0.7.1"
+kotlinx-datetime = "0.8.0"
+kermit = "2.1.0"
 mlln-units = "1.0.0-SNAPSHOT"
 serialization = "1.11.0"
 version-catalog-update-v = "1.1.0"
@@ -24,6 +25,7 @@ mlln-units = { module = "cloud.mallne:units", version.ref = "mlln-units" }
 maplibre-spatialk = { module = "org.maplibre.spatialk:geojson", version.ref = "mapLibre-spatialk" }
 antlr-runtime = { module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 
 [plugins]
 kmp = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
