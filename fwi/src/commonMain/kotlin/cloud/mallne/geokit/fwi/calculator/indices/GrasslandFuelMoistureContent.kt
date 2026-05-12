@@ -1,4 +1,4 @@
-package cloud.mallne.geokit.fwi.calculator
+package cloud.mallne.geokit.fwi.calculator.indices
 
 import cloud.mallne.geokit.fwi.calculator.Util.curingFactor
 import cloud.mallne.geokit.fwi.calculator.Util.pign
@@ -9,6 +9,7 @@ import kotlin.math.sqrt
 
 object GrasslandFuelMoistureContent {
     internal const val DEFAULT_GRASS_FUEL_LOAD = 0.35
+
     /**
      * Calculate hourly grassland fuel moisture content.
      *
@@ -111,7 +112,7 @@ object GrasslandFuelMoistureContent {
      * @param wind  10m open wind speed (km/h)
      * @return      Grassland Fuel Moisture Code (GFMC) value
      */
-    fun mcgfmcToGfmc(mc: Double, cur: Double, wind: Double): Double {
+    internal fun mcgfmcToGfmc(mc: Double, cur: Double, wind: Double): Double {
         val wind2mOpenFactor = 0.75
 
         // Grass coefficients for PsusF model

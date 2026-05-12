@@ -7,13 +7,13 @@ import kotlinx.datetime.daysUntil
 import kotlin.math.*
 
 object Util {
-    fun findQ(temp: Double, rh: Double): Double {
+    internal fun findQ(temp: Double, rh: Double): Double {
         val svp = 6.108 * exp(17.27 * temp / (temp + 237.3))
         val vp = svp * rh / 100.0
         return 217.0 * vp / (273.17 + temp)
     }
 
-    fun findRh(q: Double, temp: Double): Double {
+    internal fun findRh(q: Double, temp: Double): Double {
         val curVp = (273.17 + temp) * q / 217.0
         val rh = 100.0 * curVp / (6.108 * exp(17.27 * temp / (temp + 237.3)))
         return rh
@@ -23,7 +23,7 @@ object Util {
      * Calculates sunrise, sunset, and solar radiation for the weather stream.
      * Mirrors the Python implementation's astronomical math for JD, EqTime, and Declination.
      */
-    fun getSunlight(
+    internal fun getSunlight(
         weatherData: List<WeatherRow>,
         getSolrad: Boolean = false
     ): List<WeatherRow> {
@@ -106,7 +106,7 @@ object Util {
      * Calculates the percent cured based on the Boreal Plains seasonal variation.
      * Uses linear interpolation between 10-day data points.
      */
-    fun seasonalCuring(
+    internal fun seasonalCuring(
         date: LocalDate,
         startMon: Int = 3,
         startDay: Int = 12
@@ -149,7 +149,7 @@ object Util {
         }
     }
 
-    fun pign(
+    internal fun pign(
         mc: Double,
         wind2m: Double,
         cint: Double,
@@ -160,7 +160,7 @@ object Util {
         return 1.0 / (1.0 + exp(-1.0 * z))
     }
 
-    fun curingFactor(cur: Double): Double {
+    internal fun curingFactor(cur: Double): Double {
         return if (cur >= 20.0) {
             1.036 / (1.0 + 103.989 * exp(-0.0996 * (cur - 20.0)))
         } else {
@@ -168,16 +168,16 @@ object Util {
         }
     }
 
-    fun dryingUnits(): Double = 1.0
+    private fun dryingUnits(): Double = 1.0
 
     /**
      * Determines if the canopy interception of rainfall should be reset.
      * Mirrors the Python logic for drying units and target thresholds.
      */
-    fun rainSinceInterceptReset(
+    internal fun rainSinceInterceptReset(
         rain: Double,
         currentState: CanopyState,
-        dryingStep: Double = 1.0 // Matches drying_units() default
+        dryingStep: Double = 1.0
     ): CanopyState {
 
         val targetDryingSinceIntercept = 5.0

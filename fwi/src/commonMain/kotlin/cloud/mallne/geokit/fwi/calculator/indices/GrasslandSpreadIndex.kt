@@ -1,4 +1,4 @@
-package cloud.mallne.geokit.fwi.calculator
+package cloud.mallne.geokit.fwi.calculator.indices
 
 import cloud.mallne.geokit.fwi.calculator.Util.curingFactor
 import kotlin.math.exp
@@ -13,7 +13,7 @@ object GrasslandSpreadIndex {
      * @param cur Percentage of grassland cured (%)
      * @return    Rate of Spread in m/min
      */
-    fun mattedGrassSpreadRos(ws: Double, mc: Double, cur: Double): Double {
+    private fun mattedGrassSpreadRos(ws: Double, mc: Double, cur: Double): Double {
         // Wind function (fw)
         val fw = 16.67 * if (ws < 5.0) {
             0.054 + 0.209 * ws
@@ -48,7 +48,7 @@ object GrasslandSpreadIndex {
      * @param cur Percentage of grassland cured (%)
      * @return    Rate of Spread in m/min
      */
-    fun standingGrassSpreadRos(ws: Double, mc: Double, cur: Double): Double {
+    private fun standingGrassSpreadRos(ws: Double, mc: Double, cur: Double): Double {
         // Wind function (fw) for standing grass
         val fw = 16.67 * if (ws < 5.0) {
             0.054 + 0.269 * ws

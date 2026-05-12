@@ -1,4 +1,4 @@
-package cloud.mallne.geokit.fwi.calculator
+package cloud.mallne.geokit.fwi.calculator.indices
 
 import kotlin.math.exp
 import kotlin.math.ln
@@ -14,14 +14,14 @@ object DroughtCode {
      * @param dc [Double]        Drought Code (DC)
      * @return   [Double]        DC moisture content (%)
      */
-    fun dcToMcdc(dc: Double): Double = 400.0 * exp(-dc / 400.0)
+    internal fun dcToMcdc(dc: Double): Double = 400.0 * exp(-dc / 400.0)
 
     /**
      * Convert to DC
      * @param mcdc  [Double]     DC moisture content (%)
      * @return      [Double]     DC
      */
-    fun mcdcToDc(mcdc: Double): Double = 400.0 * ln(400.0 / mcdc)
+    internal fun mcdcToDc(mcdc: Double): Double = 400.0 * ln(400.0 / mcdc)
 
     /**
      * Calculate drought code moisture content

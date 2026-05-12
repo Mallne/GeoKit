@@ -1,4 +1,4 @@
-package cloud.mallne.geokit.fwi.calculator
+package cloud.mallne.geokit.fwi.calculator.indices
 
 import kotlin.math.exp
 import kotlin.math.ln
@@ -14,14 +14,14 @@ object DuffMoistureCode {
      * @param dmc [Double]        Duff Moisture Code (DMC)
      * @return [Double]           duff moisture content (%)
      */
-    fun dmcToMcdmc(dmc: Double): Double = (280.0 / exp(dmc / 43.43)) + 20.0
+    internal fun dmcToMcdmc(dmc: Double): Double = (280.0 / exp(dmc / 43.43)) + 20.0
 
     /**
      * Convert to DMC
      * @param mcdmc      duff moisture content (%)
      * @return           DMC
      */
-    fun mcdmcToDmc(mcdmc: Double): Double = 43.43 * ln(280.0 / (mcdmc - 20.0))
+    internal fun mcdmcToDmc(mcdmc: Double): Double = 43.43 * ln(280.0 / (mcdmc - 20.0))
 
     /**
      * Calculate duff moisture content

@@ -1,7 +1,7 @@
 package cloud.mallne.geokit.fwi
 
-import cloud.mallne.geokit.fwi.calculator.FireWeatherIndex
 import cloud.mallne.geokit.fwi.calculator.Util
+import cloud.mallne.geokit.fwi.calculator.indices.FireWeatherIndex
 import kotlinx.datetime.LocalDate
 import kotlin.math.abs
 import kotlin.test.Test

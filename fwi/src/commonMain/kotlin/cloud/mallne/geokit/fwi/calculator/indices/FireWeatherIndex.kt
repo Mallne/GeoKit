@@ -1,20 +1,13 @@
-package cloud.mallne.geokit.fwi.calculator
+package cloud.mallne.geokit.fwi.calculator.indices
 
-import cloud.mallne.geokit.fwi.calculator.DroughtCode.DC_DEFAULT
-import cloud.mallne.geokit.fwi.calculator.DroughtCode.dcToMcdc
-import cloud.mallne.geokit.fwi.calculator.DroughtCode.mcdcToDc
-import cloud.mallne.geokit.fwi.calculator.DuffMoistureCode.DMC_DEFAULT
-import cloud.mallne.geokit.fwi.calculator.DuffMoistureCode.dmcToMcdmc
-import cloud.mallne.geokit.fwi.calculator.DuffMoistureCode.mcdmcToDmc
-import cloud.mallne.geokit.fwi.calculator.FineFuelMoistureContent.FFMC_DEFAULT
-import cloud.mallne.geokit.fwi.calculator.FineFuelMoistureContent.FFMC_INTERCEPT
-import cloud.mallne.geokit.fwi.calculator.FineFuelMoistureContent.ffmcToMcffmc
-import cloud.mallne.geokit.fwi.calculator.FineFuelMoistureContent.mcffmcToFfmc
-import cloud.mallne.geokit.fwi.calculator.GrasslandFuelMoistureContent.DEFAULT_GRASS_FUEL_LOAD
-import cloud.mallne.geokit.fwi.calculator.GrasslandFuelMoistureContent.mcgfmcToGfmc
 import cloud.mallne.geokit.fwi.calculator.Util.getSunlight
 import cloud.mallne.geokit.fwi.calculator.Util.rainSinceInterceptReset
 import cloud.mallne.geokit.fwi.calculator.Util.seasonalCuring
+import cloud.mallne.geokit.fwi.calculator.indices.FineFuelMoistureContent.FFMC_DEFAULT
+import cloud.mallne.geokit.fwi.calculator.indices.FineFuelMoistureContent.FFMC_INTERCEPT
+import cloud.mallne.geokit.fwi.calculator.indices.FineFuelMoistureContent.ffmcToMcffmc
+import cloud.mallne.geokit.fwi.calculator.indices.FineFuelMoistureContent.mcffmcToFfmc
+import cloud.mallne.geokit.fwi.calculator.indices.GrasslandFuelMoistureContent.DEFAULT_GRASS_FUEL_LOAD
 import cloud.mallne.geokit.fwi.model.CanopyState
 import cloud.mallne.geokit.fwi.model.WeatherRow
 import co.touchlab.kermit.Logger
@@ -24,10 +17,10 @@ import kotlin.math.ln
 import kotlin.math.pow
 
 object FireWeatherIndex {
-    private const val GRASS_TRANSITION = true
-    private const val MON_STANDING = 7
-    private const val DAY_STANDING = 1
-    private const val CONTINUOUS_MULTIYEAR = false
+    internal const val GRASS_TRANSITION = true
+    internal const val MON_STANDING = 7
+    internal const val DAY_STANDING = 1
+    internal const val CONTINUOUS_MULTIYEAR = false
 
     /**
      * Calculate Fire Weather Index (FWI)
@@ -45,7 +38,7 @@ object FireWeatherIndex {
         return if (bb <= 1.0) bb else exp(2.72 * (0.434 * ln(bb)).pow(0.647))
     }
 
-    fun dailySeverityRating(fwi: Double): Double = 0.0272 * fwi.pow(1.77)
+    internal fun dailySeverityRating(fwi: Double): Double = 0.0272 * fwi.pow(1.77)
 
     /**
      * Calculate hourly FWI indices from hourly weather stream for a single station.
@@ -71,8 +64,8 @@ object FireWeatherIndex {
 
         var mcgfmcMatted = mcgfmcMattedOld
         var mcgfmcStanding = mcgfmcStandingOld
-        var mcdmc = dmcToMcdmc(dmcOld)
-        var mcdc = dcToMcdc(dcOld)
+        var mcdmc = DuffMoistureCode.dmcToMcdmc(dmcOld)
+        var mcdc = DroughtCode.dcToMcdc(dcOld)
 
         var currentCanopy = CanopyState(
             rainTotalPrev = precCumulative,
@@ -105,13 +98,13 @@ object FireWeatherIndex {
                 mcdmc, cur.hr.toDouble(), cur.temp, cur.rh, cur.prec,
                 cur.sunrise ?: 0.0, cur.sunset ?: 0.0, currentCanopy.rainTotalPrev
             )
-            val dmc = mcdmcToDmc(mcdmc)
+            val dmc = DuffMoistureCode.mcdmcToDmc(mcdmc)
 
             mcdc = DroughtCode(
                 mcdc, cur.hr.toDouble(), cur.temp, cur.prec,
                 cur.sunrise ?: 0.0, cur.sunset ?: 0.0, currentCanopy.rainTotalPrev
             )
-            val dc = mcdcToDc(mcdc)
+            val dc = DroughtCode.mcdcToDc(mcdc)
 
             // 4. Spread & Fire Indices
             val isi = InitialSpreadIndex(cur.ws, ffmc)
@@ -139,7 +132,7 @@ object FireWeatherIndex {
             val isStanding = cur.date >= dateGrassStanding
             val mcgfmc = if (isStanding) mcgfmcStanding else mcgfmcMatted
 
-            val gfmc = mcgfmcToGfmc(mcgfmc, cur.percentCured ?: 100.0, cur.ws)
+            val gfmc = GrasslandFuelMoistureContent.mcgfmcToGfmc(mcgfmc, cur.percentCured ?: 100.0, cur.ws)
             val gsi = GrasslandSpreadIndex(cur.ws, mcgfmc, cur.percentCured ?: 100.0, isStanding)
             val gfwi = GrasslandFireWeatherIndex(gsi, cur.grassFuelLoad ?: DEFAULT_GRASS_FUEL_LOAD)
 
@@ -199,8 +192,8 @@ object FireWeatherIndex {
         timezone: Double? = null,
         ffmcOld: Double? = FFMC_DEFAULT,
         mcffmcOld: Double? = null,
-        dmcOld: Double = DMC_DEFAULT,
-        dcOld: Double = DC_DEFAULT,
+        dmcOld: Double = DuffMoistureCode.DMC_DEFAULT,
+        dcOld: Double = DroughtCode.DC_DEFAULT,
         mcgfmcMattedOld: Double = ffmcToMcffmc(FFMC_DEFAULT),
         mcgfmcStandingOld: Double = ffmcToMcffmc(FFMC_DEFAULT),
         precCumulative: Double = 0.0,

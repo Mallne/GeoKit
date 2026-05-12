@@ -1,4 +1,4 @@
-package cloud.mallne.geokit.fwi.calculator
+package cloud.mallne.geokit.fwi.calculator.indices
 
 import kotlin.math.pow
 
