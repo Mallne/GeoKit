@@ -6,23 +6,23 @@ import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 
 data class DailySummary(
-        val id: String?,
-        val date: LocalDate,
-        val sunrise: String,
-        val sunset: String,
-        val peakHr: Int,
-        val duration: Duration,
-        val ffmc: Double,
-        val dmc: Double,
-        val dc: Double,
-        val isi: Double,
-        val bui: Double,
-        val fwi: Double,
-        val dsr: Double,
-        val gfmc: Double,
-        val gsi: Double,
-        val gfwi: Double,
-        val wsSmooth: Measure<Velocity>,
-        val isiSmooth: Double,
-        val gsiSmooth: Double
-    )
+    val id: String?,
+    val date: LocalDate,
+    val sunrise: String,
+    val sunset: String,
+    val peakHr: Int,
+    val duration: Duration,
+    override val ffmc: Double,
+    override val dmc: Double,
+    override val dc: Double,
+    override val isi: Double,
+    override val bui: Double,
+    override val fwi: Double,
+    override val dsr: Double,
+    override val gfmc: Double,
+    override val gsi: Double,
+    override val gfwi: Double,
+    val wsSmooth: Measure<Velocity>,
+    val isiSmooth: Double,
+    val gsiSmooth: Double
+    ): IndiceComponents

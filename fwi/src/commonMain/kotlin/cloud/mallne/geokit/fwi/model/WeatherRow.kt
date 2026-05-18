@@ -127,19 +127,19 @@ sealed interface WeatherRow {
         override val grassFuelLoad: Measure<UnitsRatio<Mass, Area>>? = null,
 
         val mcffmc: Measure<Probability>,
-        val ffmc: Double,
-        val dmc: Double,
-        val dc: Double,
-        val isi: Double,
-        val bui: Double,
-        val fwi: Double,
-        val dsr: Double,
+        override val ffmc: Double,
+        override val dmc: Double,
+        override val dc: Double,
+        override val isi: Double,
+        override val bui: Double,
+        override val fwi: Double,
+        override val dsr: Double,
         val mcgfmcMatted: Measure<Probability>,
         val mcgfmcStanding: Measure<Probability>,
-        val gfmc: Double,
-        val gsi: Double,
-        val gfwi: Double,
+        override val gfmc: Double,
+        override val gsi: Double,
+        override val gfwi: Double,
         val precCumulative: Measure<Length>,
         val canopyDrying: Duration
-    ) : WeatherRow
+    ) : WeatherRow, IndiceComponents
 }
