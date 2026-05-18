@@ -4,6 +4,13 @@ import cloud.mallne.geokit.fwi.calculator.Util.findQ
 import cloud.mallne.geokit.fwi.calculator.Util.findRh
 import cloud.mallne.geokit.fwi.model.MinMaxWeather
 import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.Measure
+import cloud.mallne.units.Probability
+import cloud.mallne.units.Probability.Companion.percent
+import cloud.mallne.units.Temperature
+import cloud.mallne.units.Temperature.Companion.celsius
+import cloud.mallne.units.times
 import co.touchlab.kermit.Logger
 import kotlin.math.max
 import kotlin.math.min
@@ -12,16 +19,21 @@ import kotlin.math.pow
 object MinMaxCalculator {
     private val log = Logger.withTag("MinMaxCalculator")
 
-    private fun tempMinMax(tempNoon: Double, rhNoon: Double): Pair<Double, Double> {
-        val tempRange = 17.0 - 0.16 * rhNoon + 0.22 * tempNoon
+    private fun tempMinMax(
+        tempNoon: Measure<Temperature>,
+        rhNoon: Measure<Probability>
+    ): Pair<Measure<Temperature>, Measure<Temperature>> {
+        val tempNoonU = tempNoon `in` celsius
+        val rhNoonU = rhNoon `in` percent
+        val tempRange = 17.0 - 0.16 * rhNoonU + 0.22 * tempNoonU
         return if (tempRange <= 2.0) {
-            val tempMax = tempNoon + 1.0
-            val tempMin = tempNoon - 1.0
-            tempMin to tempMax
+            val tempMax = tempNoonU + 1.0
+            val tempMin = tempNoonU - 1.0
+            tempMin * celsius to tempMax * celsius
         } else {
-            val tempMax = tempNoon + 2.0
+            val tempMax = tempNoonU + 2.0
             val tempMin = tempMax - tempRange
-            tempMin to tempMax
+            tempMin * celsius to tempMax * celsius
         }
     }
 
@@ -39,9 +51,9 @@ object MinMaxCalculator {
             val (tempMin, tempMax) = tempMinMax(row.temp, row.rh)
             val q = findQ(row.temp, row.rh)
             val rhMinUnclamped = findRh(q, tempMax)
-            val rhMin = min(100.0, max(0.0, rhMinUnclamped))
+            val rhMin = min(100.0, max(0.0, rhMinUnclamped `in` WeatherRowConstants.rh))
             val rhMaxUnclamped = findRh(q, tempMin)
-            val rhMax = min(100.0, max(0.0, rhMaxUnclamped))
+            val rhMax = min(100.0, max(0.0, rhMaxUnclamped  `in` WeatherRowConstants.rh))
             val wsMin = 0.15 * row.ws
             val wsMax = 1.25 * row.ws
 
@@ -50,12 +62,12 @@ object MinMaxCalculator {
                 MinMaxWeather(
                     id = row.id,
                     date = row.date,
-                    tempMin = (tempMin * factor).toInt() / factor,
-                    tempMax = (tempMax * factor).toInt() / factor,
-                    rhMin = (rhMin * factor).toInt() / factor,
-                    rhMax = (rhMax * factor).toInt() / factor,
-                    wsMin = (wsMin * factor).toInt() / factor,
-                    wsMax = (wsMax * factor).toInt() / factor,
+                    tempMin = (((tempMin `in` WeatherRowConstants.temp) * factor).toInt() / factor) * WeatherRowConstants.temp,
+                    tempMax = (((tempMax `in` WeatherRowConstants.temp) * factor).toInt() / factor) * WeatherRowConstants.temp,
+                    rhMin = ((rhMin * factor).toInt() / factor) * WeatherRowConstants.rh,
+                    rhMax = ((rhMax * factor).toInt() / factor) * WeatherRowConstants.rh,
+                    wsMin = (((wsMin `in` WeatherRowConstants.ws) * factor).toInt() / factor) * WeatherRowConstants.ws,
+                    wsMax = (((wsMax `in` WeatherRowConstants.ws) * factor).toInt() / factor) * WeatherRowConstants.ws,
                     prec = row.prec
                 )
             } else {
@@ -64,8 +76,8 @@ object MinMaxCalculator {
                     date = row.date,
                     tempMin = tempMin,
                     tempMax = tempMax,
-                    rhMin = rhMin,
-                    rhMax = rhMax,
+                    rhMin = rhMin * WeatherRowConstants.rh,
+                    rhMax = rhMax * WeatherRowConstants.rh,
                     wsMin = wsMin,
                     wsMax = wsMax,
                     prec = row.prec

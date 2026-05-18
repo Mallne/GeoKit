@@ -1,11 +1,19 @@
 package cloud.mallne.geokit.fwi.calculator.indices
 
+import cloud.mallne.units.Length
+import cloud.mallne.units.Length.Companion.millimeters
+import cloud.mallne.units.Measure
+import cloud.mallne.units.Probability
+import cloud.mallne.units.Probability.Companion.percent
+import cloud.mallne.units.Temperature
+import cloud.mallne.units.Temperature.Companion.celsius
+import cloud.mallne.units.times
 import kotlin.math.exp
 import kotlin.math.ln
 
 object DuffMoistureCode {
     internal const val DMC_DEFAULT = 6.0
-    private const val DMC_INTERCEPT = 1.5
+    private val DMC_INTERCEPT = 1.5 * millimeters
     private const val DMC_REGRESSION = 2.22e-4
     private const val DMC_OFFSET_TEMP = 0.0
 
@@ -14,14 +22,14 @@ object DuffMoistureCode {
      * @param dmc [Double]        Duff Moisture Code (DMC)
      * @return [Double]           duff moisture content (%)
      */
-    internal fun dmcToMcdmc(dmc: Double): Double = (280.0 / exp(dmc / 43.43)) + 20.0
+    internal fun dmcToMcdmc(dmc: Double): Measure<Probability> = ((280.0 / exp(dmc / 43.43)) + 20.0) * percent
 
     /**
      * Convert to DMC
      * @param mcdmc      duff moisture content (%)
      * @return           DMC
      */
-    internal fun mcdmcToDmc(mcdmc: Double): Double = 43.43 * ln(280.0 / (mcdmc - 20.0))
+    internal fun mcdmcToDmc(mcdmc: Measure<Probability>): Double = 43.43 * ln(280.0 / ((mcdmc `in` percent) - 20.0))
 
     /**
      * Calculate duff moisture content
@@ -38,25 +46,25 @@ object DuffMoistureCode {
      * @return                   [Double]    Hourly duff moisture content (%)
      */
     operator fun invoke(
-        lastMcdmc: Double,
+        lastMcdmc: Measure<Probability>,
         hour: Double,
-        temp: Double,
-        rh: Double,
-        prec: Double,
+        temp: Measure<Temperature>,
+        rh: Measure<Probability>,
+        prec: Measure<Length>,
         sunrise: Double,
         sunset: Double,
-        precCumulativePrev: Double,
+        precCumulativePrev: Measure<Length>,
         timeIncrement: Double = 1.0 // duration of timestep, in hours
-    ): Double {
-        var currentTemp = temp
+    ): Measure<Probability> {
+        var currentTemp = temp `in` celsius
         var mr: Double
 
         // 1. Wetting Phase
         if (precCumulativePrev + prec > DMC_INTERCEPT) {
             val rw = if (precCumulativePrev <= DMC_INTERCEPT) {
-                (precCumulativePrev + prec) * 0.92 - 1.27
+                ((precCumulativePrev `in` millimeters) + (prec `in` millimeters)) * 0.92 - 1.27
             } else {
-                prec * 0.92
+                (prec `in` millimeters) * 0.92
             }
 
             val lastDmc = mcdmcToDmc(lastMcdmc)
@@ -66,9 +74,9 @@ object DuffMoistureCode {
                 else -> 6.2 * ln(lastDmc) - 17.2
             }
 
-            mr = lastMcdmc + (1.0e3 * rw) / (b * rw + 48.77)
+            mr = (lastMcdmc `in` percent) + (1.0e3 * rw) / (b * rw + 48.77)
         } else {
-            mr = lastMcdmc
+            mr = (lastMcdmc `in` percent)
         }
 
         if (mr > 300.0) mr = 300.0
@@ -81,13 +89,13 @@ object DuffMoistureCode {
         val mcdmc = if (isDaytime) {
             if (currentTemp < 0.0) currentTemp = 0.0
 
-            val rk = DMC_REGRESSION * (currentTemp + DMC_OFFSET_TEMP) * (100.0 - rh)
+            val rk = DMC_REGRESSION * (currentTemp + DMC_OFFSET_TEMP) * (100.0 - (rh `in` percent))
             val invtau = rk / 43.43
             (mr - 20.0) * exp(-timeIncrement * invtau) + 20.0
         } else {
             mr
         }
 
-        return mcdmc.coerceAtMost(300.0)
+        return mcdmc.coerceAtMost(300.0) * percent
     }
 }

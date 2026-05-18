@@ -1,5 +1,12 @@
 package cloud.mallne.geokit.fwi.calculator.indices
 
+import cloud.mallne.units.Area
+import cloud.mallne.units.Area.Companion.squareMeters
+import cloud.mallne.units.Mass
+import cloud.mallne.units.Mass.Companion.kilograms
+import cloud.mallne.units.Measure
+import cloud.mallne.units.UnitsRatio
+import cloud.mallne.units.div
 import kotlin.math.ln
 
 object GrasslandFireWeatherIndex {
@@ -10,12 +17,12 @@ object GrasslandFireWeatherIndex {
      * @param load  Grassland Fuel Load (kg/m^2)
      * @return      Grassland Fire Weather Index
      */
-    operator fun invoke(gsi: Double, load: Double): Double {
+    operator fun invoke(gsi: Double, load: Measure<UnitsRatio<Mass, Area>>): Double {
         // Convert the index back to Rate of Spread (m/min)
         val ros = gsi / 1.11
 
         // Calculate Fire Line Intensity (kW/m)
-        val fint = 300.0 * load * ros
+        val fint = 300.0 * (load `in` (kilograms / squareMeters)) * ros
 
         return if (fint > 100.0) {
             // Logarithmic scale for higher intensities

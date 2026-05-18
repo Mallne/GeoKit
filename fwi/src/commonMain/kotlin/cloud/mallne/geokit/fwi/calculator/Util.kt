@@ -2,21 +2,34 @@ package cloud.mallne.geokit.fwi.calculator
 
 import cloud.mallne.geokit.fwi.model.CanopyState
 import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.Length
+import cloud.mallne.units.Length.Companion.millimeters
+import cloud.mallne.units.Measure
+import cloud.mallne.units.Probability
+import cloud.mallne.units.Probability.Companion.percent
+import cloud.mallne.units.Temperature
+import cloud.mallne.units.times
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.daysUntil
 import kotlin.math.*
+import kotlin.time.Duration.Companion.hours
 
 object Util {
-    internal fun findQ(temp: Double, rh: Double): Double {
-        val svp = 6.108 * exp(17.27 * temp / (temp + 237.3))
-        val vp = svp * rh / 100.0
-        return 217.0 * vp / (273.17 + temp)
+    internal fun findQ(temp: Measure<Temperature>, rh: Measure<Probability>): Double {
+        val tempU = temp `in` WeatherRowConstants.temp
+        val rhU = rh `in` WeatherRowConstants.rh
+        val svp = 6.108 * exp(17.27 * tempU / (tempU + 237.3))
+        val vp = svp * rhU / 100.0
+        return 217.0 * vp / (273.17 + tempU)
     }
 
-    internal fun findRh(q: Double, temp: Double): Double {
-        val curVp = (273.17 + temp) * q / 217.0
-        val rh = 100.0 * curVp / (6.108 * exp(17.27 * temp / (temp + 237.3)))
-        return rh
+    internal fun findRh(q: Double, temp: Measure<Temperature>): Measure<Probability> {
+        val tempU = temp `in` WeatherRowConstants.temp
+        val curVp = (273.17 + tempU) * q / 217.0
+        val rh = 100.0 * curVp / (6.108 * exp(17.27 * tempU / (tempU + 237.3)))
+        return rh * WeatherRowConstants.rh
     }
 
     /**
@@ -60,13 +73,13 @@ object Util {
             val halfDayDegree = acos(xTmp) * 180.0 / PI
 
             // Sunrise/Sunset in decimal hours
-            val sunrise = (720.0 - 4.0 * (row.long + halfDayDegree) - eqtime) / 60.0 + row.timezone
-            val sunset = (720.0 - 4.0 * (row.long - halfDayDegree) - eqtime) / 60.0 + row.timezone
+            val sunrise = (720.0 - 4.0 * (row.long + halfDayDegree) - eqtime) / 60.0 + row.timezone.totalHours
+            val sunset = (720.0 - 4.0 * (row.long - halfDayDegree) - eqtime) / 60.0 + row.timezone.totalHours
 
             // 6. Solar Radiation (solrad) - optional
-            var calculatedSolrad = row.solrad
+            var calculatedSolrad = (row.solrad?.`in`(WeatherRowConstants.solrad))
             if (getSolrad) {
-                val timeOffset = eqtime + 4.0 * row.long - 60.0 * row.timezone
+                val timeOffset = eqtime + 4.0 * row.long - 60.0 * row.timezone.totalHours
                 // TST in minutes
                 val tst = (row.hr * 60.0) + timeOffset
                 val hourAngle = (tst / 4.0) - 180.0
@@ -80,7 +93,8 @@ object Util {
                 val cosZenith = cos(zenith)
 
                 // Vapor Pressure Deficit (vpd)
-                val vpd = 6.11 * (1.0 - row.rh / 100.0) * exp(17.29 * row.temp / (row.temp + 237.3))
+                val vpd =
+                    6.11 * (1.0 - (row.rh `in` WeatherRowConstants.rh) / 100.0) * exp(17.29 * (row.temp `in` WeatherRowConstants.temp) / ((row.temp `in` WeatherRowConstants.temp) + 237.3))
 
                 calculatedSolrad = cosZenith * 0.92 * (1.0 - exp(-0.22 * vpd))
                 if (calculatedSolrad < 1e-4) calculatedSolrad = 0.0
@@ -90,7 +104,7 @@ object Util {
             row.clone(
                 sunrise = sunrise,
                 sunset = sunset,
-                solrad = calculatedSolrad
+                solrad = calculatedSolrad?.times(WeatherRowConstants.solrad)
             )
         }
     }
@@ -110,7 +124,7 @@ object Util {
         date: LocalDate,
         startMon: Int = 3,
         startDay: Int = 12
-    ): Double {
+    ): Measure<Probability> {
         val percentCuredLookup = listOf(
             96.0, 95.0, 93.0, 92.0, 90.5, 88.4, 84.4, 78.1, 68.7, 50.3,
             32.9, 23.0, 22.0, 21.0, 20.0, 25.7, 35.0, 43.0, 49.8, 60.0,
@@ -134,7 +148,7 @@ object Util {
         // 4. Determine phase and interpolate
         val maxInterpolationDays = (percentCuredLookup.size - 1) * 10
 
-        return if (daysIn < maxInterpolationDays) {
+        return (if (daysIn < maxInterpolationDays) {
             val index = daysIn / 10
             val perCur0 = percentCuredLookup[index]
             val perCur1 = percentCuredLookup[index + 1]
@@ -146,7 +160,7 @@ object Util {
         } else {
             // Return the "winter" cured value (last item in list)
             percentCuredLookup.last()
-        }
+        }) * percent
     }
 
     internal fun pign(
@@ -175,7 +189,7 @@ object Util {
      * Mirrors the Python logic for drying units and target thresholds.
      */
     internal fun rainSinceInterceptReset(
-        rain: Double,
+        rain: Measure<Length>,
         currentState: CanopyState,
         dryingStep: Double = 1.0
     ): CanopyState {
@@ -184,26 +198,28 @@ object Util {
 
         // Logic: If it is currently raining, or if there was no previous rain,
         // we reset the drying counter.
-        return if (rain > 0.0 || currentState.rainTotalPrev == 0.0) {
+        return if ((rain `in` millimeters) > 0.0 || (currentState.rainTotalPrev `in` millimeters) == 0.0) {
             currentState.copy(
-                dryingSinceIntercept = 0.0
+                dryingSinceIntercept = 0.0.hours
             )
         } else {
             // Increment drying
-            val updatedDrying = currentState.dryingSinceIntercept + dryingStep
+            val updatedDrying = currentState.dryingSinceIntercept.inWholeHours + dryingStep
 
             if (updatedDrying >= targetDryingSinceIntercept) {
                 // Reset criteria met: canopy is considered dry
                 CanopyState(
-                    rainTotalPrev = 0.0,
-                    dryingSinceIntercept = 0.0
+                    rainTotalPrev = 0.0 * millimeters,
+                    dryingSinceIntercept = 0.0.hours
                 )
             } else {
                 // Continue drying phase
                 currentState.copy(
-                    dryingSinceIntercept = updatedDrying
+                    dryingSinceIntercept = updatedDrying.hours
                 )
             }
         }
     }
+
+    val UtcOffset.totalHours: Double get() = totalSeconds / 3600.0
 }

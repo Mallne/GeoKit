@@ -1,9 +1,20 @@
 package cloud.mallne.geokit.fwi.calculator
 
+import cloud.mallne.geokit.fwi.calculator.Util.totalHours
 import cloud.mallne.geokit.fwi.model.MinMaxWeather
 import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.Length
+import cloud.mallne.units.Length.Companion.millimeters
+import cloud.mallne.units.Measure
+import cloud.mallne.units.Probability
+import cloud.mallne.units.Temperature
+import cloud.mallne.units.Temperature.Companion.celsius
+import cloud.mallne.units.Velocity
+import cloud.mallne.units.times
 import co.touchlab.kermit.Logger
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.UtcOffset
 import kotlin.math.*
 
 object HourlyInterpolator {
@@ -24,19 +35,19 @@ object HourlyInterpolator {
         val sunrise: Double,
         val sunset: Double,
         val solarNoon: Double,
-        val tempMin: Double,
-        val tempMax: Double,
-        val rhMin: Double,
-        val rhMax: Double,
-        val wsMin: Double,
-        val wsMax: Double,
-        val prec: Double
+        val tempMin: Measure<Temperature>,
+        val tempMax: Measure<Temperature>,
+        val rhMin: Measure<Probability>,
+        val rhMax: Measure<Probability>,
+        val wsMin: Measure<Velocity>,
+        val wsMax: Measure<Velocity>,
+        val prec: Measure<Length>
     )
 
     private fun calculateSunriseSunset(
         lat: Double,
         long: Double,
-        timezone: Double,
+        timezone: UtcOffset,
         date: LocalDate
     ): Pair<Double, Double> {
         val latRad = lat * PI / 180.0
@@ -60,8 +71,8 @@ object HourlyInterpolator {
         xTmp = max(-1.0, min(1.0, xTmp))
         val halfDayDegree = acos(xTmp) * 180.0 / PI
 
-        val sunrise = (720.0 - 4.0 * (long + halfDayDegree) - eqtime) / 60.0 + timezone
-        val sunset = (720.0 - 4.0 * (long - halfDayDegree) - eqtime) / 60.0 + timezone
+        val sunrise = (720.0 - 4.0 * (long + halfDayDegree) - eqtime) / 60.0 + timezone.totalHours
+        val sunset = (720.0 - 4.0 * (long - halfDayDegree) - eqtime) / 60.0 + timezone.totalHours
 
         return sunrise to sunset
     }
@@ -132,7 +143,7 @@ object HourlyInterpolator {
         dailyInput: List<MinMaxWeather>,
         lat: Double? = null,
         long: Double? = null,
-        timezone: Double? = null,
+        timezone: UtcOffset? = null,
         precHr: Int? = null,
         skipInvalid: Boolean = false,
         silent: Boolean = false,
@@ -149,7 +160,7 @@ object HourlyInterpolator {
 
         val latValue = lat ?: 0.0
         val longValue = long ?: 0.0
-        val timezoneValue = timezone ?: 0.0
+        val timezoneValue = timezone ?: UtcOffset.ZERO
 
         val groupedById = dailyInput.groupBy { it.id }
 
@@ -182,19 +193,19 @@ object HourlyInterpolator {
 
                 val tempHourly = predictVariableForDay(
                     pred, nextPred,
-                    { it.tempMin }, { it.tempMax },
+                    { it.tempMin `in` WeatherRowConstants.temp }, { it.tempMax  `in` WeatherRowConstants.temp },
                     C_TEMP.cAlpha, C_TEMP.cBeta, C_TEMP,
                     Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY
                 )
                 val windHourly = predictVariableForDay(
                     pred, nextPred,
-                    { it.wsMin }, { it.wsMax },
+                    { it.wsMin `in` WeatherRowConstants.ws }, { it.wsMax `in` WeatherRowConstants.ws },
                     C_WIND.cAlpha, C_WIND.cBeta, C_WIND,
                     0.0, Double.POSITIVE_INFINITY
                 )
                 val rhOppHourly = predictVariableForDay(
                     pred, nextPred,
-                    { 1.0 - it.rhMax }, { 1.0 - it.rhMin },
+                    { 1.0 - (it.rhMax `in` WeatherRowConstants.rh) }, { 1.0 - (it.rhMin `in` WeatherRowConstants.rh) },
                     C_RH.cAlpha, C_RH.cBeta, C_RH,
                     0.0, 1.0
                 )
@@ -206,7 +217,7 @@ object HourlyInterpolator {
                     val rh = 100.0 * (1.0 - rhOpp)
 
                     val precPlacement = precHr ?: ceil(pred.sunrise).toInt().coerceIn(0, 23)
-                    val prec = if (hour == precPlacement) pred.prec else 0.0
+                    val prec = if (hour == precPlacement) pred.prec else 0.0 * WeatherRowConstants.prec
 
                     val roundedTemp = if (roundOut != null && roundOut >= 0) {
                         val factor = 10.0.pow(roundOut)
@@ -228,9 +239,9 @@ object HourlyInterpolator {
                             id = stn,
                             date = pred.date,
                             hr = hour,
-                            temp = roundedTemp,
-                            rh = roundedRh,
-                            ws = roundedWs,
+                            temp = roundedTemp * WeatherRowConstants.temp,
+                            rh = roundedRh * WeatherRowConstants.rh,
+                            ws = roundedWs * WeatherRowConstants.ws,
                             prec = prec,
                             lat = latValue,
                             long = longValue,

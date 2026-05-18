@@ -2,7 +2,11 @@ package cloud.mallne.geokit.fwi
 
 import cloud.mallne.geokit.fwi.CSVUtil.parseCSVWithHeader
 import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.times
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.UtcOffset
+import kotlin.time.Duration.Companion.hours
 
 object PRF2007TestData {
     /**
@@ -34,13 +38,13 @@ object PRF2007TestData {
             id = id,
             date = LocalDate(year, month, day),
             hr = hour,
-            temp = temp,
-            rh = rh,
-            ws = ws,
-            prec = prec,
+            temp = temp * WeatherRowConstants.temp,
+            rh = rh * WeatherRowConstants.rh,
+            ws = ws * WeatherRowConstants.ws,
+            prec = prec * WeatherRowConstants.prec,
             lat = latitude,
             long = longitude,
-            timezone = timezone,
+            timezone = UtcOffset(timezone.toInt()),
         )
     }
 
@@ -2896,19 +2900,20 @@ object PRF2007TestData {
                     id = row["id"]!!,
                     date = LocalDate(row["yr"]!!.toInt(), row["mon"]!!.toInt(), row["day"]!!.toInt()),
                     hr = row["hr"]!!.toInt(),
-                    temp = row["temp"]!!.toDouble(),
-                    rh = row["rh"]!!.toDouble(),
-                    ws = row["ws"]!!.toDouble(),
-                    prec = row["prec"]!!.toDouble(),
+                    temp = row["temp"]!!.toDouble() * WeatherRowConstants.temp,
+                    rh = row["rh"]!!.toDouble() * WeatherRowConstants.rh,
+                    ws = row["ws"]!!.toDouble() * WeatherRowConstants.ws,
+                    prec = row["prec"]!!.toDouble() * WeatherRowConstants.prec,
                     lat = row["lat"]!!.toDouble(),
                     long = row["long"]!!.toDouble(),
-                    timezone = row["timezone"]!!.toDouble(),
+                    timezone = UtcOffset(row["timezone"]!!.toInt()),
                     sunrise = row["sunrise"]?.toDoubleOrNull(),
                     sunset = row["sunset"]?.toDoubleOrNull(),
-                    solrad = row["solrad"]?.toDoubleOrNull(),
-                    percentCured = row["percent_cured"]?.toDoubleOrNull(),
-                    grassFuelLoad = row["grass_fuel_load"]?.toDoubleOrNull(),
-                    mcffmc = row["mcffmc"]?.toDoubleOrNull() ?: 0.0,
+                    solrad = row["solrad"]?.toDoubleOrNull()?.times(WeatherRowConstants.solrad),
+                    percentCured = row["percent_cured"]?.toDoubleOrNull()?.times(WeatherRowConstants.percentCured),
+                    grassFuelLoad = row["grass_fuel_load"]?.toDoubleOrNull()?.times(WeatherRowConstants.grassFuelLoad),
+                    mcffmc = (row["mcffmc"]?.toDoubleOrNull()?.times(WeatherRowConstants.mcffmc))
+                        ?: (0.0 * WeatherRowConstants.mcffmc),
                     ffmc = row["ffmc"]?.toDoubleOrNull() ?: 0.0,
                     dmc = row["dmc"]?.toDoubleOrNull() ?: 0.0,
                     dc = row["dc"]?.toDoubleOrNull() ?: 0.0,
@@ -2916,13 +2921,16 @@ object PRF2007TestData {
                     bui = row["bui"]?.toDoubleOrNull() ?: 0.0,
                     fwi = row["fwi"]?.toDoubleOrNull() ?: 0.0,
                     dsr = row["dsr"]?.toDoubleOrNull() ?: 0.0,
-                    mcgfmcMatted = row["mcgfmc_matted"]?.toDoubleOrNull() ?: 0.0,
-                    mcgfmcStanding = row["mcgfmc_standing"]?.toDoubleOrNull() ?: 0.0,
+                    mcgfmcMatted = row["mcgfmc_matted"]?.toDoubleOrNull()?.times(WeatherRowConstants.mcffmcMatted)
+                        ?: (0.0 * WeatherRowConstants.mcffmcMatted),
+                    mcgfmcStanding = row["mcgfmc_standing"]?.toDoubleOrNull()?.times(WeatherRowConstants.mcffmcStanding)
+                        ?: (0.0 * WeatherRowConstants.mcffmcStanding),
                     gfmc = row["gfmc"]?.toDoubleOrNull() ?: 0.0,
                     gsi = row["gsi"]?.toDoubleOrNull() ?: 0.0,
                     gfwi = row["gfwi"]?.toDoubleOrNull() ?: 0.0,
-                    precCumulative = row["prec_cumulative"]?.toDoubleOrNull() ?: 0.0,
-                    canopyDrying = row["canopy_drying"]?.toDoubleOrNull() ?: 0.0
+                    precCumulative = row["prec_cumulative"]?.toDoubleOrNull()?.times(WeatherRowConstants.precCumulative)
+                        ?: (0.0 * WeatherRowConstants.precCumulative),
+                    canopyDrying = row["canopy_drying"]?.toDoubleOrNull()?.hours ?: 0.0.hours
                 )
             } catch (e: Exception) {
                 println("Error parsing hourly row: ${e.message} \n ${e.stackTraceToString()}")

@@ -10,11 +10,26 @@ import cloud.mallne.geokit.fwi.calculator.indices.FineFuelMoistureContent.mcffmc
 import cloud.mallne.geokit.fwi.calculator.indices.GrasslandFuelMoistureContent.DEFAULT_GRASS_FUEL_LOAD
 import cloud.mallne.geokit.fwi.model.CanopyState
 import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.Area.Companion.squareMeters
+import cloud.mallne.units.Length
+import cloud.mallne.units.Length.Companion.millimeters
+import cloud.mallne.units.Measure
+import cloud.mallne.units.Power.Companion.kilowatts
+import cloud.mallne.units.Probability
+import cloud.mallne.units.Probability.Companion.percent
+import cloud.mallne.units.Time
+import cloud.mallne.units.div
+import cloud.mallne.units.times
 import co.touchlab.kermit.Logger
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.UtcOffset
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 object FireWeatherIndex {
     internal const val GRASS_TRANSITION = true
@@ -46,13 +61,13 @@ object FireWeatherIndex {
     private fun stnHFWI(
         w: List<WeatherRow>,
         ffmcOld: Double?,
-        mcffmcOld: Double?,
+        mcffmcOld: Measure<Probability>?,
         dmcOld: Double,
         dcOld: Double,
-        mcgfmcMattedOld: Double,
-        mcgfmcStandingOld: Double,
-        precCumulative: Double,
-        canopyDrying: Double
+        mcgfmcMattedOld: Measure<Probability>,
+        mcgfmcStandingOld: Measure<Probability>,
+        precCumulative: Measure<Length>,
+        canopyDrying: Duration
     ): List<WeatherRow.Processed> {
 
         // Initial Moisture setup (XOR logic for FFMC/MCFFMC)
@@ -84,7 +99,7 @@ object FireWeatherIndex {
             currentCanopy = rainSinceInterceptReset(cur.prec, currentCanopy)
 
             val rainFfmc = when {
-                currentCanopy.rainTotalPrev + cur.prec <= FFMC_INTERCEPT -> 0.0
+                currentCanopy.rainTotalPrev + cur.prec <= FFMC_INTERCEPT -> 0.0 * millimeters
                 currentCanopy.rainTotalPrev > FFMC_INTERCEPT -> cur.prec
                 else -> currentCanopy.rainTotalPrev + cur.prec - FFMC_INTERCEPT
             }
@@ -120,20 +135,20 @@ object FireWeatherIndex {
             // 5. Grassland Moisture
             mcgfmcMatted = GrasslandFuelMoistureContent(
                 mcgfmcMatted, cur.temp, cur.rh, cur.ws, cur.prec,
-                cur.solrad ?: 0.0, cur.grassFuelLoad ?: DEFAULT_GRASS_FUEL_LOAD
+                cur.solrad ?: (0.0 * (kilowatts / squareMeters)), cur.grassFuelLoad ?: DEFAULT_GRASS_FUEL_LOAD
             )
 
             // Standing assumes no solar and reduced rain absorption (6% effectiveness)
             mcgfmcStanding = GrasslandFuelMoistureContent(
                 mcgfmcStanding, cur.temp, cur.rh, cur.ws, cur.prec * 0.06,
-                0.0, cur.grassFuelLoad ?: DEFAULT_GRASS_FUEL_LOAD
+                0.0 * (kilowatts / squareMeters), cur.grassFuelLoad ?: DEFAULT_GRASS_FUEL_LOAD
             )
 
             val isStanding = cur.date >= dateGrassStanding
             val mcgfmc = if (isStanding) mcgfmcStanding else mcgfmcMatted
 
-            val gfmc = GrasslandFuelMoistureContent.mcgfmcToGfmc(mcgfmc, cur.percentCured ?: 100.0, cur.ws)
-            val gsi = GrasslandSpreadIndex(cur.ws, mcgfmc, cur.percentCured ?: 100.0, isStanding)
+            val gfmc = GrasslandFuelMoistureContent.mcgfmcToGfmc(mcgfmc, cur.percentCured ?: (100.0 * percent), cur.ws)
+            val gsi = GrasslandSpreadIndex(cur.ws, mcgfmc, cur.percentCured ?: (100.0 * percent), isStanding)
             val gfwi = GrasslandFireWeatherIndex(gsi, cur.grassFuelLoad ?: DEFAULT_GRASS_FUEL_LOAD)
 
             // Construct Processed Row
@@ -189,15 +204,15 @@ object FireWeatherIndex {
      */
     operator fun invoke(
         dfWx: List<WeatherRow>,
-        timezone: Double? = null,
+        timezone: UtcOffset? = null,
         ffmcOld: Double? = FFMC_DEFAULT,
-        mcffmcOld: Double? = null,
+        mcffmcOld: Measure<Probability>? = null,
         dmcOld: Double = DuffMoistureCode.DMC_DEFAULT,
         dcOld: Double = DroughtCode.DC_DEFAULT,
-        mcgfmcMattedOld: Double = ffmcToMcffmc(FFMC_DEFAULT),
-        mcgfmcStandingOld: Double = ffmcToMcffmc(FFMC_DEFAULT),
-        precCumulative: Double = 0.0,
-        canopyDrying: Double = 0.0,
+        mcgfmcMattedOld: Measure<Probability> = ffmcToMcffmc(FFMC_DEFAULT),
+        mcgfmcStandingOld: Measure<Probability> = ffmcToMcffmc(FFMC_DEFAULT),
+        precCumulative: Measure<Length> = 0.0 * millimeters,
+        canopyDrying: Duration = 0.0.hours,
         getSolrad: Boolean? = null,
         silent: Boolean = false
     ): List<WeatherRow.Processed> {
@@ -215,7 +230,7 @@ object FireWeatherIndex {
                 updated = updated.clone(percentCured = seasonalCuring(updated.date))
             }
             if (updated.grassFuelLoad == null) {
-                updated = updated.clone(grassFuelLoad = 0.35) // DEFAULT_GRASS_FUEL_LOAD
+                updated = updated.clone(grassFuelLoad = 0.35 * WeatherRowConstants.grassFuelLoad) // DEFAULT_GRASS_FUEL_LOAD
             }
             updated
         }

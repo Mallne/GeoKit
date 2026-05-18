@@ -5,24 +5,30 @@ import cloud.mallne.geokit.fwi.calculator.indices.GrasslandSpreadIndex
 import cloud.mallne.geokit.fwi.calculator.indices.InitialSpreadIndex
 import cloud.mallne.geokit.fwi.model.DailySummary
 import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.Measure
+import cloud.mallne.units.Probability
+import cloud.mallne.units.Velocity
+import cloud.mallne.units.times
 import co.touchlab.kermit.Logger
 import kotlinx.datetime.LocalDate
 import kotlin.math.pow
+import kotlin.time.Duration.Companion.hours
 
 object DailySummaries {
     private val log = Logger.withTag("DailySummaries")
     private const val SPREAD_THRESHOLD_ISI = 5.0
 
-    private fun smooth5Pt(source: List<Double>): List<Double> {
+    private fun smooth5Pt(source: List<Measure<Velocity>>): List<Measure<Velocity>> {
         val cap = source.size
-        val dest = MutableList<Double?>(cap) { null }
+        val dest = MutableList<Measure<Velocity>?>(cap) { null }
 
         dest[0] = source[0]
         dest[cap - 1] = source[cap - 1]
 
         var miss = 0
         for (i in 0..2) {
-            if (source[i] < -90.0) miss++
+            if (source[i] `in` WeatherRowConstants.ws < -90.0) miss++
         }
         dest[1] = if (miss == 0) {
             0.25 * source[0] + 0.5 * source[1] + 0.25 * source[2]
@@ -33,7 +39,7 @@ object DailySummaries {
         for (i in 2 until cap - 2) {
             miss = 0
             for (j in (i - 2)..(i + 2)) {
-                if (source[j] < -90.0) miss++
+                if (source[j] `in` WeatherRowConstants.ws < -90.0) miss++
             }
             dest[i] = if (miss == 0) {
                 (1.0 / 16.0 * source[i - 2]) + (4.0 / 16.0 * source[i - 1]) +
@@ -46,7 +52,7 @@ object DailySummaries {
 
         miss = 0
         for (i in (cap - 3)..(cap - 1)) {
-            if (source[i] < -90.0) miss++
+            if (source[i] `in` WeatherRowConstants.ws < -90.0) miss++
         }
         dest[cap - 2] = if (miss == 0) {
             0.25 * source[cap - 3] + 0.5 * source[cap - 2] + 0.25 * source[cap - 1]
@@ -160,7 +166,7 @@ object DailySummaries {
 
                 val d = byDate[0].first.date
                 val standing: Boolean
-                val mcgfmc: Double
+                val mcgfmc: Measure<Probability>
 
                 if (FireWeatherIndex.GRASS_TRANSITION && d < dateGrassStanding) {
                     standing = false
@@ -173,7 +179,7 @@ object DailySummaries {
                 val gsiSmoothVal = GrasslandSpreadIndex(
                     wsSmooth[peakTime],
                     mcgfmc,
-                    rowAtPeak.percentCured ?: 0.0,
+                    rowAtPeak.percentCured ?: (0.0 * WeatherRowConstants.percentCured),
                     standing
                 )
 
@@ -184,7 +190,7 @@ object DailySummaries {
                         sunrise = sunriseFormatted,
                         sunset = sunsetFormatted,
                         peakHr = rowAtPeak.hr,
-                        duration = duration.toInt(),
+                        duration = duration.toInt().hours,
                         ffmc = rowAtPeak.ffmc,
                         dmc = rowAtPeak.dmc,
                         dc = rowAtPeak.dc,
@@ -219,7 +225,7 @@ object DailySummaries {
                     gfmc = (summary.gfmc * factor).toInt() / factor,
                     gsi = (summary.gsi * factor).toInt() / factor,
                     gfwi = (summary.gfwi * factor).toInt() / factor,
-                    wsSmooth = (summary.wsSmooth * factor).toInt() / factor,
+                    wsSmooth = (((summary.wsSmooth `in` WeatherRowConstants.ws) * factor).toInt() / factor) * WeatherRowConstants.ws,
                     isiSmooth = (summary.isiSmooth * factor).toInt() / factor,
                     gsiSmooth = (summary.gsiSmooth * factor).toInt() / factor
                 )

@@ -2,12 +2,10 @@ package cloud.mallne.geokit.fwi
 
 import cloud.mallne.geokit.fwi.calculator.HourlyInterpolator
 import cloud.mallne.geokit.fwi.model.MinMaxWeather
-import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.times
 import kotlinx.datetime.LocalDate
-import kotlin.math.PI
-import kotlin.math.sin
-import kotlin.math.exp
-import kotlin.math.ceil
+import kotlinx.datetime.UtcOffset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -20,13 +18,13 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 5, 12),
-                tempMin = 10.0,
-                tempMax = 25.0,
-                rhMin = 30.0,
-                rhMax = 80.0,
-                wsMin = 5.0,
-                wsMax = 15.0,
-                prec = 0.0
+                tempMin = 10.0 * WeatherRowConstants.temp,
+                tempMax = 25.0 * WeatherRowConstants.temp,
+                rhMin = 30.0 * WeatherRowConstants.rh,
+                rhMax = 80.0 * WeatherRowConstants.rh,
+                wsMin = 5.0 * WeatherRowConstants.ws,
+                wsMax = 15.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             )
         )
 
@@ -34,7 +32,7 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true,
             roundOut = 4
         )
@@ -53,35 +51,35 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 5, 10),
-                tempMin = 8.0,
-                tempMax = 22.0,
-                rhMin = 35.0,
-                rhMax = 85.0,
-                wsMin = 4.0,
-                wsMax = 12.0,
-                prec = 0.0
+                tempMin = 8.0 * WeatherRowConstants.temp,
+                tempMax = 22.0 * WeatherRowConstants.temp,
+                rhMin = 35.0 * WeatherRowConstants.rh,
+                rhMax = 85.0 * WeatherRowConstants.rh,
+                wsMin = 4.0 * WeatherRowConstants.ws,
+                wsMax = 12.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             ),
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 5, 11),
-                tempMin = 10.0,
-                tempMax = 25.0,
-                rhMin = 30.0,
-                rhMax = 80.0,
-                wsMin = 5.0,
-                wsMax = 15.0,
-                prec = 0.0
+                tempMin = 10.0 * WeatherRowConstants.temp,
+                tempMax = 25.0 * WeatherRowConstants.temp,
+                rhMin = 30.0 * WeatherRowConstants.rh,
+                rhMax = 80.0 * WeatherRowConstants.rh,
+                wsMin = 5.0 * WeatherRowConstants.ws,
+                wsMax = 15.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             ),
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 5, 12),
-                tempMin = 12.0,
-                tempMax = 28.0,
-                rhMin = 25.0,
-                rhMax = 75.0,
-                wsMin = 6.0,
-                wsMax = 16.0,
-                prec = 0.0
+                tempMin = 12.0 * WeatherRowConstants.temp,
+                tempMax = 28.0 * WeatherRowConstants.temp,
+                rhMin = 25.0 * WeatherRowConstants.rh,
+                rhMax = 75.0 * WeatherRowConstants.rh,
+                wsMin = 6.0 * WeatherRowConstants.ws,
+                wsMax = 16.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             )
         )
 
@@ -89,7 +87,7 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true,
             roundOut = 4
         )
@@ -103,7 +101,7 @@ class HourlyInterpolatorTest {
             emptyList(),
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true
         )
 
@@ -116,13 +114,13 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 6, 21),
-                tempMin = 15.0,
-                tempMax = 30.0,
-                rhMin = 30.0,
-                rhMax = 70.0,
-                wsMin = 5.0,
-                wsMax = 20.0,
-                prec = 0.0
+                tempMin = 15.0 * WeatherRowConstants.temp,
+                tempMax = 30.0 * WeatherRowConstants.temp,
+                rhMin = 30.0 * WeatherRowConstants.rh,
+                rhMax = 70.0 * WeatherRowConstants.rh,
+                wsMin = 5.0 * WeatherRowConstants.ws,
+                wsMax = 20.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             )
         )
 
@@ -130,11 +128,11 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true
         )
 
-        val windValues = result.map { it.ws }
+        val windValues = result.map { it.ws `in` WeatherRowConstants.ws }
         assertTrue(windValues.all { it >= 0.0 })
         val maxWind = windValues.maxOrNull()!!
         assertTrue(maxWind <= 20.0)
@@ -146,13 +144,13 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 6, 21),
-                tempMin = 15.0,
-                tempMax = 30.0,
-                rhMin = 40.0,
-                rhMax = 90.0,
-                wsMin = 5.0,
-                wsMax = 15.0,
-                prec = 0.0
+                tempMin = 15.0 * WeatherRowConstants.temp,
+                tempMax = 30.0 * WeatherRowConstants.temp,
+                rhMin = 40.0 * WeatherRowConstants.rh,
+                rhMax = 90.0 * WeatherRowConstants.rh,
+                wsMin = 5.0 * WeatherRowConstants.ws,
+                wsMax = 15.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             )
         )
 
@@ -160,11 +158,11 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true
         )
 
-        val rhValues = result.map { it.rh }
+        val rhValues = result.map { it.rh `in` WeatherRowConstants.rh }
         assertTrue(rhValues.all { it >= 0.0 && it <= 100.0 })
     }
 
@@ -174,13 +172,13 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 6, 21),
-                tempMin = 15.0,
-                tempMax = 30.0,
-                rhMin = 40.0,
-                rhMax = 90.0,
-                wsMin = 5.0,
-                wsMax = 15.0,
-                prec = 5.5
+                tempMin = 15.0 * WeatherRowConstants.temp,
+                tempMax = 30.0 * WeatherRowConstants.temp,
+                rhMin = 40.0 * WeatherRowConstants.rh,
+                rhMax = 90.0 * WeatherRowConstants.rh,
+                wsMin = 5.0 * WeatherRowConstants.ws,
+                wsMax = 15.0 * WeatherRowConstants.ws,
+                prec = 5.5 * WeatherRowConstants.prec
             )
         )
 
@@ -188,11 +186,11 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true
         )
 
-        val precValues = result.map { it.prec }
+        val precValues = result.map { it.prec `in` WeatherRowConstants.prec }
         val nonZeroPrecs = precValues.filter { it > 0.0 }
         assertEquals(1, nonZeroPrecs.size)
         assertEquals(5.5, nonZeroPrecs[0], 0.1)
@@ -204,13 +202,13 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "test",
                 date = LocalDate(2007, 5, 12),
-                tempMin = 10.123456,
-                tempMax = 25.987654,
-                rhMin = 30.111111,
-                rhMax = 80.999999,
-                wsMin = 5.555555,
-                wsMax = 15.444444,
-                prec = 0.0
+                tempMin = 10.123456 * WeatherRowConstants.temp,
+                tempMax = 25.987654 * WeatherRowConstants.temp,
+                rhMin = 30.111111 * WeatherRowConstants.rh,
+                rhMax = 80.999999 * WeatherRowConstants.rh,
+                wsMin = 5.555555 * WeatherRowConstants.ws,
+                wsMax = 15.444444 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             )
         )
 
@@ -218,14 +216,14 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true,
             roundOut = 2
         )
 
         val firstHour = result.first()
-        val tempScaled = (firstHour.temp * 100).toInt()
-        assertEquals(tempScaled.toDouble(), firstHour.temp * 100, 0.001)
+        val tempScaled = ((firstHour.temp `in` WeatherRowConstants.temp) * 100).toInt()
+        assertEquals(tempScaled.toDouble(), (firstHour.temp `in` WeatherRowConstants.temp) * 100, 0.001)
     }
 
     @Test
@@ -234,24 +232,24 @@ class HourlyInterpolatorTest {
             MinMaxWeather(
                 id = "stn1",
                 date = LocalDate(2007, 5, 10),
-                tempMin = 8.0,
-                tempMax = 22.0,
-                rhMin = 35.0,
-                rhMax = 85.0,
-                wsMin = 4.0,
-                wsMax = 12.0,
-                prec = 0.0
+                tempMin = 8.0 * WeatherRowConstants.temp,
+                tempMax = 22.0 * WeatherRowConstants.temp,
+                rhMin = 35.0 * WeatherRowConstants.rh,
+                rhMax = 85.0 * WeatherRowConstants.rh,
+                wsMin = 4.0 * WeatherRowConstants.ws,
+                wsMax = 12.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             ),
             MinMaxWeather(
                 id = "stn2",
                 date = LocalDate(2007, 5, 10),
-                tempMin = 10.0,
-                tempMax = 24.0,
-                rhMin = 30.0,
-                rhMax = 80.0,
-                wsMin = 5.0,
-                wsMax = 14.0,
-                prec = 0.0
+                tempMin = 10.0 * WeatherRowConstants.temp,
+                tempMax = 24.0 * WeatherRowConstants.temp,
+                rhMin = 30.0 * WeatherRowConstants.rh,
+                rhMax = 80.0 * WeatherRowConstants.rh,
+                wsMin = 5.0 * WeatherRowConstants.ws,
+                wsMax = 14.0 * WeatherRowConstants.ws,
+                prec = 0.0 * WeatherRowConstants.prec
             )
         )
 
@@ -259,7 +257,7 @@ class HourlyInterpolatorTest {
             dailyInput,
             lat = 45.0,
             long = -75.0,
-            timezone = -4.0,
+            timezone = UtcOffset(hours = -4),
             silent = true
         )
 

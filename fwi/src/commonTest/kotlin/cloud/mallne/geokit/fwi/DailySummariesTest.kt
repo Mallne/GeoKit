@@ -1,6 +1,7 @@
 package cloud.mallne.geokit.fwi
 
 import cloud.mallne.geokit.fwi.calculator.DailySummaries
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -22,7 +23,7 @@ class DailySummariesTest {
             assertEquals(expected.sunrise, actual.sunrise, "Sunrise mismatch at index $index")
             assertEquals(expected.sunset, actual.sunset, "Sunset mismatch at index $index")
             assertEquals(expected.peakHr, actual.peakHr, "PeakHr mismatch at index $index")
-            assertEquals(expected.duration, actual.duration, "Duration mismatch at index $index")
+            assertEquals(expected.duration, actual.duration.inWholeHours.toInt(), "Duration mismatch at index $index")
 
             assertEquals(expected.ffmc, actual.ffmc, 0.001, "FFMC mismatch at index $index")
             assertEquals(expected.dmc, actual.dmc, 0.001, "DMC mismatch at index $index")
@@ -34,7 +35,7 @@ class DailySummariesTest {
             assertEquals(expected.gfmc, actual.gfmc, 0.001, "GFMC mismatch at index $index")
             assertEquals(expected.gsi, actual.gsi, 0.001, "GSI mismatch at index $index")
             assertEquals(expected.gfwi, actual.gfwi, 0.001, "GFWI mismatch at index $index")
-            assertEquals(expected.wsSmooth, actual.wsSmooth, 0.001, "WsSmooth mismatch at index $index")
+            assertEquals(expected.wsSmooth, actual.wsSmooth `in` WeatherRowConstants.ws, 0.001, "WsSmooth mismatch at index $index")
             assertEquals(expected.isiSmooth, actual.isiSmooth, 0.001, "IsiSmooth mismatch at index $index")
             assertEquals(expected.gsiSmooth, actual.gsiSmooth, 0.001, "GsiSmooth mismatch at index $index")
         }

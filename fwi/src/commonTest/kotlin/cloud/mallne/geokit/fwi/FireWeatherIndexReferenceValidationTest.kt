@@ -2,6 +2,8 @@ package cloud.mallne.geokit.fwi
 
 import cloud.mallne.geokit.fwi.calculator.Util
 import cloud.mallne.geokit.fwi.calculator.indices.FireWeatherIndex
+import cloud.mallne.geokit.fwi.model.WeatherRow
+import cloud.mallne.geokit.fwi.model.WeatherRowConstants
 import kotlinx.datetime.LocalDate
 import kotlin.math.abs
 import kotlin.test.Test
@@ -82,7 +84,7 @@ class FireWeatherIndexReferenceValidationTest {
         val curingJan = Util.seasonalCuring(LocalDate(2007, 1, 15))
         println("Jan 15 curing: $curingJan")
 
-        assertTrue(curingMay < 100, "May should not be fully cured")
-        assertTrue(curingJan > 90, "January should be mostly cured")
+        assertTrue(curingMay `in` WeatherRowConstants.percentCured < 100, "May should not be fully cured")
+        assertTrue(curingJan `in` WeatherRowConstants.percentCured > 90, "January should be mostly cured")
     }
 }

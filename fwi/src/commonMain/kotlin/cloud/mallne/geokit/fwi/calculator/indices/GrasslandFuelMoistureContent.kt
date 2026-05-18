@@ -2,13 +2,22 @@ package cloud.mallne.geokit.fwi.calculator.indices
 
 import cloud.mallne.geokit.fwi.calculator.Util.curingFactor
 import cloud.mallne.geokit.fwi.calculator.Util.pign
+import cloud.mallne.units.*
+import cloud.mallne.units.Area.Companion.squareMeters
+import cloud.mallne.units.Length.Companion.kilometers
+import cloud.mallne.units.Length.Companion.millimeters
+import cloud.mallne.units.Mass.Companion.kilograms
+import cloud.mallne.units.Power.Companion.kilowatts
+import cloud.mallne.units.Probability.Companion.percent
+import cloud.mallne.units.Temperature.Companion.celsius
+import cloud.mallne.units.Time.Companion.hours
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 object GrasslandFuelMoistureContent {
-    internal const val DEFAULT_GRASS_FUEL_LOAD = 0.35
+    internal val DEFAULT_GRASS_FUEL_LOAD = 0.35 * (kilograms / squareMeters)
 
     /**
      * Calculate hourly grassland fuel moisture content.
@@ -24,36 +33,43 @@ object GrasslandFuelMoistureContent {
      * @return                Grassland fuel moisture content (%)
      */
     operator fun invoke(
-        lastmc: Double,
-        temp: Double,
-        rh: Double,
-        ws: Double,
-        rain: Double,
-        solrad: Double,
-        load: Double,
+        lastmc: Measure<Probability>,
+        temp: Measure<Temperature>,
+        rh: Measure<Probability>,
+        ws: Measure<Velocity>,
+        rain: Measure<Length>,
+        solrad: Measure<UnitsRatio<Power, Area>>,
+        load: Measure<UnitsRatio<Mass, Area>>,
         timeIncrement: Double = 1.0
-    ): Double {
+    ): Measure<Probability> {
+        val lastmcU = lastmc `in` percent
+        val tempU = temp `in` celsius
+        val rhU = rh `in` percent
+        val wsU = ws `in` (kilometers / hours)
+        val rainU = rain `in` millimeters
+        val solradU = solrad `in` (kilowatts / squareMeters)
+        val loadU = load `in` (kilograms / squareMeters)
         val rf = 0.27
         val drf = 0.389633
 
-        var mo = lastmc
+        var mo = lastmcU
 
         // 1. Wetting from rain
-        if (rain != 0.0) {
-            mo += (rain / load) * 100.0
+        if (rainU != 0.0) {
+            mo += (rainU / loadU) * 100.0
             if (mo > 250.0) mo = 250.0
         }
 
         // 2. Fuel Temperature (tf) from CEVW
-        val tf = temp + 17.9 * solrad * exp(-0.034 * ws)
+        val tf = tempU + 17.9 * solradU * exp(-0.034 * wsU)
 
         // 3. Fuel Humidity (rhf)
-        val rhf = if (tf > temp) {
-            val numerator = rh * 6.107 * 10.0.pow(7.5 * temp / (temp + 237.0))
+        val rhf = if (tf > tempU) {
+            val numerator = rhU * 6.107 * 10.0.pow(7.5 * tempU / (tempU + 237.0))
             val denominator = 6.107 * 10.0.pow(7.5 * tf / (tf + 237.0))
             numerator / denominator
         } else {
-            rh
+            rhU
         }
 
         // Common factor in Equilibrium Moisture Content (EMC) formulas
@@ -92,7 +108,7 @@ object GrasslandFuelMoistureContent {
             if (a1 < 0.0) a1 = 0.0
 
             // 6. Calculate rate of change (xkd)
-            var xkd = (0.424 * (1.0 - a1.pow(1.7)) + (0.0694 * sqrt(ws) * (1.0 - a1.pow(8.0))))
+            var xkd = (0.424 * (1.0 - a1.pow(1.7)) + (0.0694 * sqrt(wsU) * (1.0 - a1.pow(8.0))))
             xkd *= drf * exp(0.0365 * tf)
 
             // 7. Final moisture calculation
@@ -100,7 +116,7 @@ object GrasslandFuelMoistureContent {
             m = e + moe * exp(-1.0 * ln(10.0) * xkd * timeIncrement)
         }
 
-        return m
+        return m * percent
     }
 
     /**
@@ -112,7 +128,7 @@ object GrasslandFuelMoistureContent {
      * @param wind  10m open wind speed (km/h)
      * @return      Grassland Fuel Moisture Code (GFMC) value
      */
-    internal fun mcgfmcToGfmc(mc: Double, cur: Double, wind: Double): Double {
+    internal fun mcgfmcToGfmc(mc: Measure<Probability>, cur: Measure<Probability>, wind: Measure<Velocity>): Double {
         val wind2mOpenFactor = 0.75
 
         // Grass coefficients for PsusF model
@@ -121,13 +137,13 @@ object GrasslandFuelMoistureContent {
         val cWind = 0.075
 
         // Convert 10m wind to 2m wind
-        val wind2m = wind2mOpenFactor * wind
+        val wind2m = wind2mOpenFactor * (wind `in` kilometers / hours)
 
         // Calculate initial probability of ignition
-        val probIgn = pign(mc, wind2m, intercept, cMoisture, cWind)
+        val probIgn = pign(mc `in` percent, wind2m, intercept, cMoisture, cWind)
 
         // Adjust ignition based on the curing factor (Cruz et al 2015)
-        val newPign = curingFactor(cur) * probIgn
+        val newPign = curingFactor(cur `in` percent) * probIgn
 
         // Algebraically reverse the Pign equation to find effective moisture content (egmc)
         var egmc = if (newPign > 0.0 && newPign < 1.0) {
@@ -146,6 +162,6 @@ object GrasslandFuelMoistureContent {
         }
 
         // Convert effective moisture content to FFMC scale
-        return FineFuelMoistureContent.mcffmcToFfmc(egmc)
+        return FineFuelMoistureContent.mcffmcToFfmc(egmc * percent)
     }
 }

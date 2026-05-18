@@ -1,6 +1,12 @@
 package cloud.mallne.geokit.fwi.calculator.indices
 
 import cloud.mallne.geokit.fwi.calculator.Util.curingFactor
+import cloud.mallne.units.*
+import cloud.mallne.units.Length.Companion.kilometers
+import cloud.mallne.units.Length.Companion.meters
+import cloud.mallne.units.Probability.Companion.percent
+import cloud.mallne.units.Time.Companion.hours
+import cloud.mallne.units.Time.Companion.minutes
 import kotlin.math.exp
 import kotlin.math.pow
 
@@ -13,19 +19,25 @@ object GrasslandSpreadIndex {
      * @param cur Percentage of grassland cured (%)
      * @return    Rate of Spread in m/min
      */
-    private fun mattedGrassSpreadRos(ws: Double, mc: Double, cur: Double): Double {
+    private fun mattedGrassSpreadRos(
+        ws: Measure<Velocity>,
+        mc: Measure<Probability>,
+        cur: Measure<Probability>
+    ): Measure<UnitsRatio<Length, Time>> {
         // Wind function (fw)
-        val fw = 16.67 * if (ws < 5.0) {
-            0.054 + 0.209 * ws
+        val wsu = ws `in` (kilometers / hours)
+        val mcu = mc `in` percent
+        val fw = 16.67 * if (wsu < 5.0) {
+            0.054 + 0.209 * wsu
         } else {
-            1.1 + 0.715 * (ws - 5.0).pow(0.844)
+            1.1 + 0.715 * (wsu - 5.0).pow(0.844)
         }
 
         // Moisture function (fm)
         var fm = when {
-            mc < 12.0 -> exp(-0.108 * mc)
-            mc < 20.0 && ws < 10.0 -> 0.6838 - 0.0342 * mc
-            mc < 23.9 && ws >= 10.0 -> 0.547 - 0.0228 * mc
+            mcu < 12.0 -> exp(-0.108 * mcu)
+            mcu < 20.0 && wsu < 10.0 -> 0.6838 - 0.0342 * mcu
+            mcu < 23.9 && wsu >= 10.0 -> 0.547 - 0.0228 * mcu
             else -> 0.0
         }
 
@@ -35,9 +47,9 @@ object GrasslandSpreadIndex {
         }
 
         // Curing factor (using the previously converted function)
-        val cf = curingFactor(cur)
+        val cf = curingFactor(cur `in` percent)
 
-        return fw * fm * cf
+        return (fw * fm * cf) * (meters / minutes)
     }
 
     /**
@@ -48,19 +60,25 @@ object GrasslandSpreadIndex {
      * @param cur Percentage of grassland cured (%)
      * @return    Rate of Spread in m/min
      */
-    private fun standingGrassSpreadRos(ws: Double, mc: Double, cur: Double): Double {
+    private fun standingGrassSpreadRos(
+        ws: Measure<Velocity>,
+        mc: Measure<Probability>,
+        cur: Measure<Probability>
+    ): Measure<UnitsRatio<Length, Time>> {
+        val wsu = ws `in` (kilometers / hours)
+        val mcu = mc `in` percent
         // Wind function (fw) for standing grass
-        val fw = 16.67 * if (ws < 5.0) {
-            0.054 + 0.269 * ws
+        val fw = 16.67 * if (wsu < 5.0) {
+            0.054 + 0.269 * wsu
         } else {
-            1.4 + 0.838 * (ws - 5.0).pow(0.844)
+            1.4 + 0.838 * (wsu - 5.0).pow(0.844)
         }
 
         // Moisture function (fm) - same logic as matted grass
         var fm = when {
-            mc < 12.0 -> exp(-0.108 * mc)
-            mc < 20.0 && ws < 10.0 -> 0.6838 - 0.0342 * mc
-            mc < 23.9 && ws >= 10.0 -> 0.547 - 0.0228 * mc
+            mcu < 12.0 -> exp(-0.108 * mcu)
+            mcu < 20.0 && wsu < 10.0 -> 0.6838 - 0.0342 * mcu
+            mcu < 23.9 && wsu >= 10.0 -> 0.547 - 0.0228 * mcu
             else -> 0.0
         }
 
@@ -70,9 +88,9 @@ object GrasslandSpreadIndex {
         }
 
         // Curing factor
-        val cf = curingFactor(cur)
+        val cf = curingFactor(cur `in` percent)
 
-        return fw * fm * cf
+        return (fw * fm * cf) * (meters / minutes)
     }
 
     /**
@@ -85,9 +103,9 @@ object GrasslandSpreadIndex {
      * @return          Grassland Spread Index
      */
     operator fun invoke(
-        ws: Double,
-        mc: Double,
-        cur: Double,
+        ws: Measure<Velocity>,
+        mc: Measure<Probability>,
+        cur: Measure<Probability>,
         standing: Boolean
     ): Double {
         // Select the appropriate Rate of Spread model based on grass state
@@ -98,6 +116,6 @@ object GrasslandSpreadIndex {
         }
 
         // Scale the ROS to determine the index value
-        return 1.11 * ros
+        return 1.11 * (ros `in` (meters / minutes))
     }
 }
