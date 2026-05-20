@@ -12,6 +12,7 @@ import cloud.mallne.units.Velocity
 import cloud.mallne.units.times
 import co.touchlab.kermit.Logger
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlin.math.pow
 import kotlin.time.Duration.Companion.hours
 
@@ -51,7 +52,7 @@ object DailySummaries {
         }
 
         miss = 0
-        for (i in (cap - 3)..(cap - 1)) {
+        for (i in (cap - 3)..<cap) {
             if (source[i] `in` WeatherRowConstants.ws < -90.0) miss++
         }
         dest[cap - 2] = if (miss == 0) {
@@ -148,12 +149,8 @@ object DailySummaries {
 
                 val sr = rowAtPeak.sunrise ?: 0.0
                 val ss = rowAtPeak.sunset ?: 0.0
-                val sunriseFormatted = "${sr.toInt().toString().padStart(2, '0')}:${
-                    (60 * (sr - sr.toInt())).toInt().toString().padStart(2, '0')
-                }"
-                val sunsetFormatted = "${ss.toInt().toString().padStart(2, '0')}:${
-                    (60 * (ss - ss.toInt())).toInt().toString().padStart(2, '0')
-                }"
+                val sunriseFormatted = LocalTime(sr.toInt(),(60 * (sr - sr.toInt())).toInt())
+                val sunsetFormatted = LocalTime(ss.toInt(), (60 * (ss - ss.toInt())).toInt())
 
                 val duration = if (isiSmooth.any { it >= SPREAD_THRESHOLD_ISI }) {
                     val activeBurning = rows.filterIndexed { index, _ -> isiSmooth[index] >= SPREAD_THRESHOLD_ISI }

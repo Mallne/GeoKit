@@ -13,4 +13,6 @@ interface IndiceComponents {
     val gfmc: Double
     val gsi: Double
     val gfwi: Double
+    val gfwiClassification: FWIClassification
+        get() = FWIClassification.classify(gfwi)
 }

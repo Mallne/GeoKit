@@ -5,6 +5,7 @@ import cloud.mallne.geokit.fwi.calculator.Util.findRh
 import cloud.mallne.geokit.fwi.model.MinMaxWeather
 import cloud.mallne.geokit.fwi.model.WeatherRow
 import cloud.mallne.geokit.fwi.model.WeatherRowConstants
+import cloud.mallne.units.Length.Companion.millimeters
 import cloud.mallne.units.Measure
 import cloud.mallne.units.Probability
 import cloud.mallne.units.Probability.Companion.percent
@@ -53,7 +54,7 @@ object MinMaxCalculator {
             val rhMinUnclamped = findRh(q, tempMax)
             val rhMin = min(100.0, max(0.0, rhMinUnclamped `in` WeatherRowConstants.rh))
             val rhMaxUnclamped = findRh(q, tempMin)
-            val rhMax = min(100.0, max(0.0, rhMaxUnclamped  `in` WeatherRowConstants.rh))
+            val rhMax = min(100.0, max(0.0, rhMaxUnclamped `in` WeatherRowConstants.rh))
             val wsMin = 0.15 * row.ws
             val wsMax = 1.25 * row.ws
 
@@ -90,5 +91,28 @@ object MinMaxCalculator {
         }
 
         return results
+    }
+
+    fun aggregate(hourlyInput: List<WeatherRow.Input>): List<MinMaxWeather> {
+        return hourlyInput.groupBy { it.date }.map { (date, rows) ->
+            val tempMin = rows.minOf { it.temp }
+            val tempMax = rows.maxOf { it.temp }
+            val rhMin = rows.minOf { it.rh }
+            val rhMax = rows.maxOf { it.rh }
+            val wsMin = rows.minOf { it.ws }
+            val wsMax = rows.maxOf { it.ws }
+            val prec = rows.fold(0.0 * millimeters) { current, row-> row.prec + current }
+            MinMaxWeather(
+                date = date,
+                tempMin = tempMin,
+                tempMax = tempMax,
+                rhMin = rhMin,
+                rhMax = rhMax,
+                wsMin = wsMin,
+                wsMax = wsMax,
+                prec = prec,
+                id = hourlyInput.firstOrNull()?.id,
+            )
+        }
     }
 }

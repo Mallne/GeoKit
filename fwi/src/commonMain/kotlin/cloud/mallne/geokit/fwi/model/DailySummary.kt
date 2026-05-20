@@ -3,13 +3,14 @@ package cloud.mallne.geokit.fwi.model
 import cloud.mallne.units.Measure
 import cloud.mallne.units.Velocity
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlin.time.Duration
 
 data class DailySummary(
     val id: String?,
     val date: LocalDate,
-    val sunrise: String,
-    val sunset: String,
+    val sunrise: LocalTime,
+    val sunset: LocalTime,
     val peakHr: Int,
     val duration: Duration,
     override val ffmc: Double,
