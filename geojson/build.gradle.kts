@@ -40,7 +40,7 @@ kotlin {
     linuxX64()
 
     sourceSets {
-        val commonMain by getting {
+        val commonMain = getByName("commonMain") {
             dependencies {
                 api(libs.kotlinx.serialization.json)
                 api(libs.maplibre.spatialk)
@@ -73,8 +73,8 @@ mavenPublishing {
                     maven {
                         url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
                         credentials {
-                            username = properties["dc.username"] as String?
-                            password = properties["dc.password"] as String?
+                            username = project.findProperty("dc.username") as String?
+                            password = project.findProperty("dc.password") as String?
                         }
                     }
                 }
