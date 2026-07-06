@@ -24,11 +24,11 @@ data class FeatureMember(
 ) {
     fun properties(prefix: String): Map<String, String> {
         val elements =
-            content?.getChildNodes()?.filter { it is Element }?.filter { (it as Element).prefix == prefix }
-        return elements?.associate { (it as Element).localName to (it.getTextContent()?.trim() ?: "") } ?: emptyMap()
+            content?.getChildNodes()?.filterIsInstance<Element>()?.filter { it.prefix == prefix }
+        return elements?.associate { (it.localName ?: "") to (it.getTextContent()?.trim() ?: "") } ?: emptyMap()
     }
 
-    fun geometry(prefix: String?, localPart: String, xml: XML = XML()): AbstractGeometryType? {
+    fun geometry(prefix: String?, localPart: String, xml: XML = XML.recommended_1_0()): AbstractGeometryType? {
         val geomElement = content?.getElementsByTagName(if (prefix != null) "$prefix:$localPart" else localPart)
         val geomNode = geomElement?.firstOrNull() as? Element
         val node = geomNode?.getChildNodes()?.firstOrNull { it is Element } as? Element
@@ -36,7 +36,7 @@ data class FeatureMember(
         return serialized?.let { xml.decodeFromString<AbstractGeometryType>(it) }
     }
 
-    fun geometry(localPart: String, xml: XML = XML()): AbstractGeometryType? {
+    fun geometry(localPart: String, xml: XML = XML.recommended_1_0()): AbstractGeometryType? {
         return geometry(null, localPart, xml)
     }
 }
