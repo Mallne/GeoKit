@@ -53,5 +53,12 @@ data class Vertex(
     fun asString(decimals: Int = Int.MAX_VALUE) =
         "${this.latitude.round(decimals)}, ${longitude.round(decimals)}"
 
-    companion object Composable
+    companion object Composable {
+        /**
+         * Sentinel for an "unset"/invalid location: `(0.0, 0.0)` (Null Island). Not a meaningful
+         * coordinate for this app (Thüringen, Germany) and survives serialization as a regular
+         * [Vertex].
+         */
+        val UNSET: Vertex = Vertex(0.0, 0.0)
+    }
 }
