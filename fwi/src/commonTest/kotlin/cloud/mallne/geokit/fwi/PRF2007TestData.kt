@@ -5,6 +5,7 @@ import cloud.mallne.geokit.fwi.model.WeatherRow
 import cloud.mallne.geokit.fwi.model.WeatherRowConstants
 import cloud.mallne.units.times
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.UtcOffset
 import kotlin.time.Duration.Companion.hours
 
@@ -54,8 +55,8 @@ object PRF2007TestData {
     data class DailyCsvRow(
         val id: String?,
         val date: LocalDate,
-        val sunrise: String,
-        val sunset: String,
+        val sunrise: LocalTime,
+        val sunset: LocalTime,
         val peakHr: Int,
         val duration: Int,
         val ffmc: Double,
@@ -2865,8 +2866,8 @@ object PRF2007TestData {
                 DailyCsvRow(
                     id = row["id"]?.ifEmpty { null },
                     date = LocalDate(row["yr"]!!.toInt(), row["mon"]!!.toInt(), row["day"]!!.toInt()),
-                    sunrise = row["sunrise"]!!,
-                    sunset = row["sunset"]!!,
+                    sunrise = LocalTime.parse(row["sunrise"]!!),
+                    sunset = LocalTime.parse(row["sunset"]!!),
                     peakHr = row["peak_hr"]!!.toInt(),
                     duration = row["duration"]!!.toInt(),
                     ffmc = row["ffmc"]!!.parseScientificDouble(),
