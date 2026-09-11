@@ -8,9 +8,9 @@ android-minSdk = "24"
 antlr = "1.0.13"
 ben-manes-versions-v = "0.61.0"
 dependency-analysis-v = "3.19.1"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 kotlinx-datetime = "0.8.0"
-kermit = "2.1.0"
+kermit = "2.2.0"
 mlln-units = "1.0.0-SNAPSHOT"
 serialization = "1.11.0"
 version-catalog-update-v = "1.1.1"
@@ -31,7 +31,7 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kmp = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 mavenPublish = "com.vanniktech.maven.publish:0.37.0"
-ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "ben-manes-versions-v" }
+ben-manes-versions = { id = "io.github.ben-manes.versions", version.ref = "ben-manes-versions-v" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis-v" }
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update-v" }
 antlr = { id = "com.strumenta.antlr-kotlin", version.ref = "antlr" }
