@@ -1,21 +1,21 @@
 [versions]
 # @pin
-agp = "9.1.1"
+agp = "9.4.0"
 # @keep
 android-compileSdk = "36"
 # @keep
 android-minSdk = "24"
-antlr = "1.0.13"
-ben-manes-versions-v = "0.61.0"
-dependency-analysis-v = "3.19.1"
+antlr = "1.0.14"
+ben-manes-versions-v = "0.64.0"
+dependency-analysis-v = "3.19.2"
 kotlin = "2.4.20"
-kotlinx-datetime = "0.8.0"
+kotlinx-datetime = "0.8.0-0.6.x-compat"
 kermit = "2.2.0"
 mlln-units = "1.0.0-SNAPSHOT"
 serialization = "1.11.0"
 version-catalog-update-v = "1.1.1"
 xmlutil = "1.0.2.1"
-mapLibre-spatialk = "0.7.0"
+mapLibre-spatialk = "0.8.0"
 
 [libraries]
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
