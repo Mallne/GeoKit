@@ -87,6 +87,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
 }
 
+
 mavenPublishing {
     publishing {
         publications {
@@ -105,14 +106,16 @@ mavenPublishing {
                         }
                     }
                 }
-                repositories {
-                    maven {
-                        url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
-                        credentials {
-                            username = project.findProperty("dc.username") as? String ?: ""
-                            password = project.findProperty("dc.password") as? String ?: ""
-                        }
-                    }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "DiCentraArtefacts"
+                url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
+                credentials {
+                    username = project.findProperty("dc.username") as? String ?: ""
+                    password = project.findProperty("dc.password") as? String ?: ""
                 }
             }
         }
