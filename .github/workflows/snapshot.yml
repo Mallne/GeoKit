@@ -29,8 +29,18 @@ jobs:
           COMMIT_COUNT=$(git rev-list --count HEAD)
           echo "version=${BASE_VERSION}.${COMMIT_COUNT}-build.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
+      - name: Debug credentials
+        run: |
+          echo "NEXUS_USERNAME set: $([ -n "$NEXUS_USERNAME" ] && echo 'yes' || echo 'NO')"
+          echo "NEXUS_PASSWORD set: $([ -n "$NEXUS_PASSWORD" ] && echo 'yes' || echo 'NO')"
+          curl -sf -o /dev/null -w "%{http_code}" -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+            "https://registry.mallne.cloud/repository/DiCentraArtefacts/cloud/mallne/units/1.0.0/units-1.0.0.module"
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
       - name: Publish SNAPSHOT
-        run: ./gradlew --no-daemon publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
+        run: ./gradlew --no-daemon --info publish -PVERSION_NAME="${{ steps.version.outputs.version }}" 2>&1 | grep -i -E "(units|cloud.mallne|repository|credential|resolve)" | head -50
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
