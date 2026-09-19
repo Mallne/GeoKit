@@ -18,7 +18,6 @@ dependencyResolutionManagement {
                 username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
                 password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
             }
-            content { includeGroupByRegex("cloud\\.mallne.*") }
         }
     }
 }
