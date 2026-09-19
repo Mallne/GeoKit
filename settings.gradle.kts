@@ -12,11 +12,19 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
-            credentials {
-                username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
-                password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "DiCentraArtefacts"
+                    url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
+                    credentials {
+                        username = providers.environmentVariable("NEXUS_USERNAME").orNull
+                        password = providers.environmentVariable("NEXUS_PASSWORD").orNull
+                    }
+                }
+            }
+            filter {
+                includeGroupByRegex("cloud\\.mallne.*")
             }
         }
     }
