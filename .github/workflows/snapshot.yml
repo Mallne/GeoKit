@@ -29,8 +29,25 @@ jobs:
           COMMIT_COUNT=$(git rev-list --count HEAD)
           echo "version=${BASE_VERSION}.${COMMIT_COUNT}-build.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Debug dependency resolution
-        run: ./gradlew --no-daemon --info :calculation:compileAndroidMainKotlinMetadata 2>&1 | grep -iE "(cloud[./]mallne|units|Could not resolve|Failed to|Downloading)" || true
+      - name: Check published artifact metadata
+        run: |
+          echo "=== Fetching .module file ==="
+          curl -sf -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+            "https://registry.mallne.cloud/repository/DiCentraArtefacts/cloud/mallne/units/1.0.0/units-1.0.0.module" | python3 -m json.tool 2>/dev/null || echo "FAILED to fetch .module"
+          echo ""
+          echo "=== Fetching .pom file ==="
+          curl -sf -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+            "https://registry.mallne.cloud/repository/DiCentraArtefacts/cloud/mallne/units/1.0.0/units-1.0.0.pom" || echo "FAILED to fetch .pom"
+          echo ""
+          echo "=== Listing artifacts ==="
+          curl -sf -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+            "https://registry.mallne.cloud/service/rest/v1/search?name=units&group=cloud.mallne&version=1.0.0" | python3 -m json.tool 2>/dev/null | head -80 || echo "FAILED to list"
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Check dependency tree
+        run: ./gradlew --no-daemon :calculation:dependencies --configuration commonMainCompileClasspath 2>&1 | tail -30
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
