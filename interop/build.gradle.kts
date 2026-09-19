@@ -4,15 +4,15 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+group = "cloud.mallne.geokit"
+version = project.findProperty("VERSION_NAME") ?: "1.0.0-SNAPSHOT"
+
 plugins {
     alias(libs.plugins.kmp)
     alias(libs.plugins.android.library)
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.kotlin.serialization)
 }
-
-group = "cloud.mallne.geokit"
-version = "1.0.0-SNAPSHOT"
 
 kotlin {
     jvm()
@@ -87,7 +87,9 @@ mavenPublishing {
         }
     }
 
-    signAllPublications()
+    if (project.findProperty("dc.signingKey") != null) {
+        signAllPublications()
+    }
 
-    coordinates(group.toString(), project.name, version.toString())
+    coordinates(group.toString(), project.name)
 }
