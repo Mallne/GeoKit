@@ -13,6 +13,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Clone Units (dependency)
+        uses: actions/checkout@v7
+        with:
+          repository: Mallne/Units
+          path: ../units
+
       - uses: actions/setup-java@v6
         with:
           java-version: '25'
@@ -39,17 +45,6 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: Debug dependency resolution
-        run: |
-          echo "=== Composite build check ==="
-          ls -la ../units 2>&1 || echo "../units does NOT exist"
-          echo ""
-          echo "=== Trying to resolve units dependency ==="
-          ./gradlew --no-daemon --info :calculation:compileKotlinJvm 2>&1 | grep -E "(repositories|cloud.mallne|units|DiCentraArtefacts|Unresolved|FAILED|BUILD)" | head -50
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
       - name: Generate SNAPSHOT version
         id: version
         run: |
@@ -59,7 +54,7 @@ jobs:
           echo "version=${BASE_VERSION}.${COMMIT_COUNT}-build.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Publish SNAPSHOT
-        run: ./gradlew --no-daemon --info publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
+        run: ./gradlew --no-daemon publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
