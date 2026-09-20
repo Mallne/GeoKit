@@ -39,6 +39,17 @@ jobs:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
+      - name: Debug dependency resolution
+        run: |
+          echo "=== Composite build check ==="
+          ls -la ../units 2>&1 || echo "../units does NOT exist"
+          echo ""
+          echo "=== Trying to resolve units dependency ==="
+          ./gradlew --no-daemon --info :calculation:compileKotlinJvm 2>&1 | grep -E "(repositories|cloud.mallne|units|DiCentraArtefacts|Unresolved|FAILED|BUILD)" | head -50
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
       - name: Generate SNAPSHOT version
         id: version
         run: |
