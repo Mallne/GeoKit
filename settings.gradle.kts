@@ -7,12 +7,6 @@ pluginManagement {
         mavenCentral()
     }
 }
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
 
 val unitsDir = file("../units")
 if (unitsDir.exists()) {

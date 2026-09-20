@@ -2,6 +2,8 @@ import nl.littlerobots.vcu.plugin.resolver.VersionSelectors
 
 allprojects {
     repositories {
+        google()
+        mavenCentral()
         maven {
             url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
             credentials {
