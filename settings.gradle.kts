@@ -8,6 +8,21 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
+            credentials {
+                username = providers.environmentVariable("NEXUS_USERNAME").orNull
+                password = providers.environmentVariable("NEXUS_PASSWORD").orNull
+            }
+        }
+    }
+}
+
 val unitsDir = file("../units")
 if (unitsDir.exists()) {
     includeBuild(unitsDir.absolutePath) {

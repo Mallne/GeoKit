@@ -21,6 +21,27 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Verify Nexus credentials
+        run: |
+          if [ -z "$NEXUS_USERNAME" ] || [ -z "$NEXUS_PASSWORD" ]; then
+            echo "::error::NEXUS_USERNAME or NEXUS_PASSWORD secrets are not configured."
+            exit 1
+          fi
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+            "https://registry.mallne.cloud/repository/DiCentraArtefacts/cloud/mallne/units/1.0.0/units-1.0.0.pom")
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Nexus returned HTTP $HTTP_CODE — check credentials."
+            exit 1
+          fi
+          echo "Nexus OK (HTTP $HTTP_CODE)"
+
+      - name: Resolve all dependencies
+        run: ./gradlew --no-daemon dependencies -PVERSION_NAME="0.0.0"
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
       - name: Generate SNAPSHOT version
         id: version
         run: |
@@ -28,12 +49,6 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           COMMIT_COUNT=$(git rev-list --count HEAD)
           echo "version=${BASE_VERSION}.${COMMIT_COUNT}-build.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-
-      - name: Resolve all dependencies (fail-fast before compile)
-        run: ./gradlew --no-daemon dependencies -PVERSION_NAME="0.0.0"
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Publish SNAPSHOT
         run: ./gradlew --no-daemon --info publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
