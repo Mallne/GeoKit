@@ -8,25 +8,10 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "DiCentraArtefacts"
-                    url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
-                    credentials {
-                        username = providers.environmentVariable("NEXUS_USERNAME").orNull
-                        password = providers.environmentVariable("NEXUS_PASSWORD").orNull
-                    }
-                }
-            }
-            filter {
-                includeGroupByRegex("cloud\\.mallne.*")
-            }
-        }
     }
 }
 
