@@ -13,12 +13,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Clone Units (dependency)
-        uses: actions/checkout@v7
-        with:
-          repository: Mallne/Units
-          path: ../units
-
       - uses: actions/setup-java@v6
         with:
           java-version: '25'

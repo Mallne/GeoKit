@@ -22,9 +22,6 @@ allprojects {
                 username = providers.environmentVariable("NEXUS_USERNAME").orNull
                 password = providers.environmentVariable("NEXUS_PASSWORD").orNull
             }
-            content {
-                includeGroupByRegex("cloud\\.mallne.*")
-            }
         }
     }
 }
