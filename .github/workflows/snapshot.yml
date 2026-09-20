@@ -35,6 +35,9 @@ jobs:
             exit 1
           fi
           echo "Nexus OK (HTTP $HTTP_CODE)"
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Resolve all dependencies
         run: ./gradlew --no-daemon dependencies -PVERSION_NAME="0.0.0"
