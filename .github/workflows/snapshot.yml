@@ -29,43 +29,8 @@ jobs:
           COMMIT_COUNT=$(git rev-list --count HEAD)
           echo "version=${BASE_VERSION}.${COMMIT_COUNT}-build.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Check dependency graph
-        run: |
-          ./gradlew --no-daemon :calculation:resolvableConfigurations 2>&1 | grep -i "compile\|api\|classpath" | head -20
-          echo "---"
-          ./gradlew --no-daemon :calculation:dependencies --configuration androidReleaseCompileClasspath 2>&1 | tail -50
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - name: Publish SNAPSHOT with full info log
-        run: ./gradlew --no-daemon --info publish -PVERSION_NAME="${{ steps.version.outputs.version }}" > /tmp/gradle-info.log 2>&1 || true
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - name: Analyze logs
-        run: |
-          echo "=== Lines mentioning 'units' ==="
-          grep -i "units" /tmp/gradle-info.log | grep -v "JsNpm\|wasmJs\|jsNpm\|kotlin-native\|konan\|linuxX64" | head -30
-          echo ""
-          echo "=== Lines mentioning 'cloud.mallne' ==="
-          grep -i "cloud.mallne" /tmp/gradle-info.log | head -20
-          echo ""
-          echo "=== Lines mentioning 'resolve' or 'resolv' ==="
-          grep -i "resolv" /tmp/gradle-info.log | grep -i "cloud\|mallne\|units" | head -20
-          echo ""
-          echo "=== Repository access logs ==="
-          grep -i "registry.mallne.cloud" /tmp/gradle-info.log | head -20
-          echo ""
-          echo "=== Failed downloads ==="
-          grep -iE "(Could not resolve|Failed to download|Could not find)" /tmp/gradle-info.log | head -20
-          echo ""
-          echo "=== Gradle config cache ==="
-          grep -i "configuration cache\|configuration-time" /tmp/gradle-info.log | head -5
-
       - name: Publish SNAPSHOT
-        run: ./gradlew --no-daemon publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
+        run: ./gradlew --no-daemon --info publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
