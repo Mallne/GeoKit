@@ -1,7 +1,7 @@
 package cloud.mallne.geokit.coordinates.builtin.method
 
 import cloud.mallne.geokit.coordinates.builtin.EPSGParameters
-import cloud.mallne.geokit.coordinates.execution.CalculationExtensions.`~`
+import cloud.mallne.geokit.coordinates.execution.CalculationExtensions.approx
 import cloud.mallne.geokit.coordinates.execution.ExecutionDispatchMethod
 import cloud.mallne.geokit.coordinates.execution.GeokitCoordinateConversionContext
 import cloud.mallne.geokit.coordinates.execution.IdentityLocator.Companion.findParameter
@@ -81,11 +81,11 @@ internal object EPSG9807 : ExecutionDispatchMethod {
         return LocalCoordinate(latitude = N, longitude = E)
     }
 
-    private fun meridionalArcDistance(): Double = if (phi_o `~` 0.0) {
+    private fun meridionalArcDistance(): Double = if (phi_o approx 0.0) {
         0.0
-    } else if (phi_o `~` (PI / 2.0)) {
+    } else if (phi_o approx (PI / 2.0)) {
         B * (PI / 2.0)
-    } else if (phi_o `~` (-PI / 2.0)) {
+    } else if (phi_o approx (-PI / 2.0)) {
         B * (-PI / 2.0)
     } else {
         val Q_o = asinh(tan(phi_o)) - (e * atanh(e * sin(phi_o)))
@@ -129,7 +129,7 @@ internal object EPSG9807 : ExecutionDispatchMethod {
             Q_doublePrime = Q_prime + (e * atanh(e * tanh(Q_prime)))
 
             // Check for convergence
-            if (Q_doublePrime `~` Q_prime) {
+            if (Q_doublePrime approx Q_prime) {
                 break
             }
             Q_prime = Q_doublePrime

@@ -30,10 +30,6 @@ internal object CalculationExtensions {
     }
 
     @JvmName("approximateTo")
-    infix fun Double.`~`(other: Double): Boolean {
-        return this approx other
-    }
-
     infix fun Double.approx(other: Double): Boolean {
         return abs(this - other) < EPSILON
     }
