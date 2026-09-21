@@ -78,8 +78,8 @@ mavenPublishing {
                 name = "DiCentraArtefacts"
                 url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
                 credentials {
-                    username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
-                    password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
+                    username = System.getenv("NEXUS_USERNAME")
+                    password = System.getenv("NEXUS_PASSWORD")
                 }
             }
         }
