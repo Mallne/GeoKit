@@ -88,10 +88,6 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
 }
 
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    dependsOn(generateKotlinGrammarSource)
-}
-
 mavenPublishing {
     publishing {
         repositories {

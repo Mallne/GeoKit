@@ -29,6 +29,9 @@ jobs:
           COMMIT_COUNT=$(git rev-list --count HEAD)
           echo "version=${BASE_VERSION}.${COMMIT_COUNT}-build.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
+      - name: Generate ANTLR sources
+        run: ./gradlew --no-daemon :coordinates:generateKotlinGrammarSource
+
       - name: Publish SNAPSHOT
         run: ./gradlew --no-daemon publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
         env:
