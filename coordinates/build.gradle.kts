@@ -88,7 +88,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
 }
 
 
-tasks.matching { it.name.startsWith("compile") && it.name.endsWith("Kotlin") }.configureEach {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     dependsOn(generateKotlinGrammarSource)
 }
 
