@@ -90,37 +90,27 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
 
 mavenPublishing {
     publishing {
-        publications {
-            create<MavenPublication>("maven") {
-                groupId = project.group.toString()
-                artifactId = project.name
-                version = project.version.toString()
-
-                pom {
-                    name = "GeoKit Coordinates"
-                    inceptionYear = "2025"
-                    developers {
-                        developer {
-                            name = "Mallne"
-                            url = "mallne.cloud"
-                        }
-                    }
-                }
-            }
-        }
-
         repositories {
             maven {
                 name = "DiCentraArtefacts"
                 url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
                 credentials {
-                    username = System.getenv("NEXUS_USERNAME")
-                    password = System.getenv("NEXUS_PASSWORD")
+                    username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
+                    password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
                 }
             }
         }
     }
 
-
     coordinates(group.toString(), project.name)
+    pom {
+        name = "GeoKit Coordinates"
+        inceptionYear = "2025"
+        developers {
+            developer {
+                name = "Mallne"
+                url = "mallne.cloud"
+            }
+        }
+    }
 }

@@ -19,8 +19,8 @@ allprojects {
         maven {
             url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
             credentials {
-                username = System.getenv("NEXUS_USERNAME")
-                password = System.getenv("NEXUS_PASSWORD")
+                username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
+                password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
             }
         }
     }
