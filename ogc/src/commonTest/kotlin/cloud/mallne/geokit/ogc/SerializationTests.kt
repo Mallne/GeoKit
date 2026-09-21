@@ -4,7 +4,6 @@ import cloud.mallne.geokit.ogc.model.gml.geometry.AbstractGeometryType
 import cloud.mallne.geokit.ogc.model.gml.geometry.MultiSurface
 import cloud.mallne.geokit.ogc.model.wfs.FeatureCollection
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.modules.SerializersModule
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.test.Test
@@ -17,9 +16,7 @@ class SerializationTests {
     @OptIn(ExperimentalXmlUtilApi::class)
     @Test
     fun testDataset() {
-        val xml = XML {
-            recommended()
-        }
+        val xml = XML.recommended_1_0()
         val source = stripXmlProlog(ParserTest.GPRXY)
         val objs = xml.decodeFromString<FeatureCollection>(source)
         assertTrue(objs.members.isNotEmpty(), "Expected at least one member")
@@ -34,9 +31,7 @@ class SerializationTests {
     @OptIn(ExperimentalXmlUtilApi::class)
     @Test
     fun textMultiSurface() {
-        val xml = XML {
-            recommended()
-        }
+        val xml = XML.recommended_1_0()
         val objs = xml.decodeFromString<MultiSurface>(
             ParserTest.SURFACE_MEMBER,
         )
@@ -46,9 +41,7 @@ class SerializationTests {
     @OptIn(ExperimentalXmlUtilApi::class)
     @Test
     fun textGeom() {
-        val xml = XML {
-            recommended()
-        }
+        val xml = XML.recommended_1_0()
         val objs = xml.decodeFromString<AbstractGeometryType>(
             ParserTest.GEOM,
         )
@@ -59,10 +52,7 @@ class SerializationTests {
     @OptIn(ExperimentalXmlUtilApi::class)
     @Test
     fun textCurve() {
-        val xml = XML(SerializersModule {
-        }) {
-            recommended()
-        }
+        val xml = XML.recommended_1_0()
         val objs = xml.decodeFromString<AbstractGeometryType>(
             ParserTest.CURVE,
         )
