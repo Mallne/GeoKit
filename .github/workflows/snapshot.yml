@@ -32,6 +32,9 @@ jobs:
       - name: Generate ANTLR sources
         run: ./gradlew --no-daemon :coordinates:generateKotlinGrammarSource
 
+      - name: Build and test
+        run: ./gradlew --no-daemon build
+
       - name: Publish SNAPSHOT
         run: ./gradlew --no-daemon publish -PVERSION_NAME="${{ steps.version.outputs.version }}"
         env:

@@ -24,6 +24,9 @@ jobs:
       - name: Generate ANTLR sources
         run: ./gradlew --no-daemon :coordinates:generateKotlinGrammarSource
 
+      - name: Build and test
+        run: ./gradlew --no-daemon build
+
       - name: Publish release
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
