@@ -8,10 +8,24 @@ import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
 import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 class SerializationTests {
     private fun stripXmlProlog(input: String): String =
         input.trimStart().replaceFirst(Regex("""^<\?xml[^?]*\?>\s*"""), "")
+
+    @OptIn(ExperimentalXmlUtilApi::class)
+    @Test
+    fun featureCollectionAcceptsWfsResponseMetadataAttributes() {
+        val xml = XML.recommended_1_0()
+        val source = """<wfs:FeatureCollection xmlns:wfs="${Namespaces.WFS}" timeStamp="2026-10-13T00:00:00Z" numberMatched="unknown" numberReturned="10" next="https://example.test/features?startIndex=10" previous="https://example.test/features?startIndex=0" lockId="lock-1"/>"""
+
+        val collection = xml.decodeFromString<FeatureCollection>(source)
+
+        assertEquals("https://example.test/features?startIndex=10", collection.next)
+        assertEquals("https://example.test/features?startIndex=0", collection.previous)
+        assertEquals("lock-1", collection.lockId)
+    }
 
     @OptIn(ExperimentalXmlUtilApi::class)
     @Test
