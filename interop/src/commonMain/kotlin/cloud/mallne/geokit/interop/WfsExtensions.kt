@@ -1,9 +1,7 @@
 package cloud.mallne.geokit.interop
 
 import cloud.mallne.geokit.geojson.CalculationInterop.toBoundary
-import cloud.mallne.geokit.geojson.CalculationInterop.toBoundingBox
 import cloud.mallne.geokit.interop.GmlGeometryExtensions.toGeoJson
-import cloud.mallne.geokit.ogc.Extensions.toBoundary
 import cloud.mallne.geokit.ogc.Extensions.toGmlBoundedBy
 import cloud.mallne.geokit.ogc.model.wfs.FeatureMember
 import cloud.mallne.geokit.ogc.model.wfs.WfsBoundedBy
@@ -16,7 +14,10 @@ import cloud.mallne.geokit.ogc.model.wfs.FeatureCollection as WfsFeatureCollecti
 
 object WfsExtensions {
     fun BoundingBox.toGmlBoundedBy(): WfsBoundedBy = this.toBoundary().toGmlBoundedBy()
-    fun WfsBoundedBy.toGeoJson(): BoundingBox? = this.toBoundary()?.toBoundingBox()
+    fun WfsBoundedBy.toGeoJson(): BoundingBox? = envelope?.let {
+        // Keep source coordinates intact until CRS conversion; projected metres are not degrees.
+        BoundingBox(southwest = it.lowerCorner.toGeoJson().single(), northeast = it.upperCorner.toGeoJson().single())
+    }
 
     fun FeatureMember.toGeoJson(prefix: String, geometryLocalPart: String, xml: XML = XML.recommended_1_0()) = Feature(
         geometry = this.geometry(prefix, geometryLocalPart, xml)?.toGeoJson(),
