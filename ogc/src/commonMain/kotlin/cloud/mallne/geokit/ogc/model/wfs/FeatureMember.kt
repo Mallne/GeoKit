@@ -23,14 +23,11 @@ data class FeatureMember(
     val content: Element? = null
 ) {
     fun properties(prefix: String): Map<String, String> {
-        val elements =
-            content?.getChildNodes()?.filterIsInstance<Element>()?.filter { it.prefix == prefix }
-        return elements?.associate { (it.localName ?: "") to (it.getTextContent()?.trim() ?: "") } ?: emptyMap()
+        return propertyElements(prefix).associate { (it.localName ?: "") to (it.getTextContent()?.trim() ?: "") }
     }
 
     fun geometry(prefix: String?, localPart: String, xml: XML = XML.recommended_1_0()): AbstractGeometryType? {
-        val geomElement = content?.getElementsByTagName(if (prefix != null) "$prefix:$localPart" else localPart)
-        val geomNode = geomElement?.firstOrNull() as? Element
+        val geomNode = propertyElements(prefix).firstOrNull { it.localName == localPart }
         val node = geomNode?.getChildNodes()?.firstOrNull { it is Element } as? Element
         val serialized = node?.let { xml.encodeToString(it) }
         return serialized?.let { xml.decodeFromString<AbstractGeometryType>(it) }
@@ -38,5 +35,13 @@ data class FeatureMember(
 
     fun geometry(localPart: String, xml: XML = XML.recommended_1_0()): AbstractGeometryType? {
         return geometry(null, localPart, xml)
+    }
+
+    private fun propertyElements(prefix: String?): List<Element> {
+        val feature = content ?: return emptyList()
+        val namespace = feature.getNamespaceURI()
+        return feature.getChildNodes().filterIsInstance<Element>().filter {
+            if (namespace.isNullOrEmpty()) prefix == null || it.prefix == prefix else it.getNamespaceURI() == namespace
+        }
     }
 }
