@@ -13,7 +13,7 @@ kotlinx-datetime = "0.8.0"
 kermit = "2.2.0"
 mlln-units = "1.0.2"
 serialization = "1.12.0"
-version-catalog-update-v = "1.1.1"
+version-catalog-update-v = "1.1.2"
 xmlutil = "1.0.2.1"
 mapLibre-spatialk = "0.8.0"
 
