@@ -46,6 +46,11 @@ kotlin {
                 api(libs.mlln.units)
             }
         }
+        val commonTest = getByName("commonTest") {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
     }
     jvmToolchain(25)
 }

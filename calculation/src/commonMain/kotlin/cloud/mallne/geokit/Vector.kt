@@ -25,9 +25,7 @@ data class Vector(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other != null && this::class != other::class) return false
-
-        other as Vector
+        if (other !is Vector) return false
 
         if (origin != other.origin) return false
         if (!direction.contentEquals(other.direction)) return false
