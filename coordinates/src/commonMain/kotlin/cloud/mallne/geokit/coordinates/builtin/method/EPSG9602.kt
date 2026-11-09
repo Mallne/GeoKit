@@ -6,12 +6,14 @@ import cloud.mallne.geokit.coordinates.execution.MethodDispatcher
 import cloud.mallne.geokit.coordinates.model.AbstractCoordinate
 import cloud.mallne.geokit.coordinates.model.LocalCoordinate
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractParameter
+import cloud.mallne.geokit.coordinates.tokens.ast.expression.AngleUnit
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.GeodeticCoordinateReferenceSystem
+import cloud.mallne.geokit.coordinates.tokens.ast.expression.SpatialCS
 import kotlin.math.*
 
 internal object EPSG9602 : ExecutionDispatchMethod {
     override val commonNames: List<String> =
-        listOf("Geographic 3D to Geocentric", "Geocentric to Geographic 3D", "Geographic/Geocentric conversions")
+        listOf("Geographic/geocentric conversions", "Geographic 3D to Geocentric", "Geocentric to Geographic 3D")
     override val identity: String = "EPSG:9602"
 
     /**
@@ -27,8 +29,6 @@ internal object EPSG9602 : ExecutionDispatchMethod {
      * Greenwich equivalent. Geocentric coordinates X, Y and Z take their units from the units for the ellipsoid
      * axes (a and b). As it is conventional for X, Y and Z to be in metres, if the ellipsoid axis dimensions are given
      * in another linear unit they should first be converted to metres.
-     *
-     * TODO handle the case for differing units and non Greenwich prime meridians
      */
     override fun execute(
         coordinate: AbstractCoordinate,
@@ -58,11 +58,12 @@ internal object EPSG9602 : ExecutionDispatchMethod {
         coordinateSystem: GeodeticCoordinateReferenceSystem
     ): LocalCoordinate {
         val phi = coordinate.phi
-        val lambda = coordinate.lambda
+        val lambda = coordinate.lambda + primeMeridianOffset(coordinateSystem)
         val h = coordinate.h!!
 
         // Extract ellipsoid parameters
-        val a = coordinateSystem.system.ellipsoid.semiMajorAxis
+        val ellipsoid = coordinateSystem.system.ellipsoid
+        val a = ellipsoid.semiMajorAxis * (ellipsoid.unit?.conversionFactor ?: 1.0)
         val e2 = coordinateSystem.system.ellipsoid.eccentricitySquared
 
         // Calculate derived parameters
@@ -90,23 +91,27 @@ internal object EPSG9602 : ExecutionDispatchMethod {
         val y = coordinate.y
         val z = coordinate.z!!
 
-        val lambda = atan2(y, x)
+        val greenwichLambda = atan2(y, x)
+        val localLambda = greenwichLambda - primeMeridianOffset(coordinateSystem)
+        val lambda = atan2(sin(localLambda), cos(localLambda))
         val p = hypot(x, y)
         val e2 = coordinateSystem.system.ellipsoid.eccentricitySquared
-        val a = coordinateSystem.system.ellipsoid.semiMajorAxis
-        val b = coordinateSystem.system.ellipsoid.semiMinorAxis
+        val ellipsoid = coordinateSystem.system.ellipsoid
+        val axisUnit = ellipsoid.unit?.conversionFactor ?: 1.0
+        val a = ellipsoid.semiMajorAxis * axisUnit
+        val b = ellipsoid.semiMinorAxis * axisUnit
 
         // Handle special case for points on the Z-axis (at the poles)
-        if (p < 1e-6) {
-            val semiMinorAxis = a * sqrt(1.0 - e2) // b = a * sqrt(1-e^2)
+        if (p == 0.0) {
+            require(z != 0.0) { "Geographic coordinates are undefined at the geocentre." }
             val phi = if (z > 0) PI / 2.0 else -PI / 2.0
-            val h = abs(z) - semiMinorAxis
+            val h = abs(z) - b
             return LocalCoordinate(phi, 0.0, h)
         }
 
         val epsilon = e2 / (1 - e2)
         // Calculate intermediate parametric latitude q
-        val q = atan2(b * a, p * b)
+        val q = atan2(z * a, p * b)
         // Calculate components for the final latitude formula
         val sinQ = sin(q)
         val cosQ = cos(q)
@@ -117,13 +122,19 @@ internal object EPSG9602 : ExecutionDispatchMethod {
         // Calculate final Geodetic Latitude (phi)
         val phi = atan2(numerator, denominator)
 
-        // Calculate prime vertical radius (v or N) using the final phi
+        // Project onto the ellipsoid normal instead of dividing by cos(phi),
+        // which loses precision for points near either pole.
         val sinPhi = sin(phi)
-        val v = a / sqrt(1.0 - e2 * sinPhi * sinPhi)
-
-        // Calculate final Ellipsoidal Height (h)
-        val h = (p / cos(phi)) - v
+        val h = p * cos(phi) + z * sinPhi - a * sqrt(1.0 - e2 * sinPhi * sinPhi)
 
         return LocalCoordinate(phi, lambda, h)
+    }
+
+    private fun primeMeridianOffset(coordinateSystem: GeodeticCoordinateReferenceSystem): Double {
+        val meridian = coordinateSystem.system.primeMeridian?.irmLongitude ?: return 0.0
+        val spatialCS = coordinateSystem.coordinateSystem as? SpatialCS
+        val unit = meridian.unit ?: (spatialCS?.unit as? AngleUnit)
+            ?: spatialCS?.spatialAxis?.firstNotNullOfOrNull { it.unit as? AngleUnit }
+        return meridian.longitude * (unit?.conversionFactor ?: (PI / 180.0))
     }
 }

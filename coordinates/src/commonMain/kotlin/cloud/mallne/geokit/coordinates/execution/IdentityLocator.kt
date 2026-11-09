@@ -8,8 +8,8 @@ interface IdentityLocator {
     val identity: String?
     companion object {
         fun List<AbstractParameter>.findParameterByName(name: String): AbstractParameter? {
-            val exactMatch = find { it.name == name}
-            return exactMatch ?: find { parameter -> parameter.name.contains(name) }
+            val exactMatch = find { it.name.equals(name, ignoreCase = true) }
+            return exactMatch ?: find { parameter -> parameter.name.contains(name, ignoreCase = true) }
         }
         fun List<AbstractParameter>.findParameterById(id: String): AbstractParameter? {
             return find { parameter -> parameter.identifiers.find { it.epsgId == id } != null }
@@ -19,8 +19,8 @@ interface IdentityLocator {
         }
 
         fun <T: IdentityLocator> List<T>.findByName(name: String): T? {
-            val exactMatch = find { it.commonNames.contains(name)}
-            return exactMatch ?: find { loc -> loc.commonNames.find { it.contains(name) } != null }
+            val exactMatch = find { loc -> loc.commonNames.any { it.equals(name, ignoreCase = true) } }
+            return exactMatch ?: find { loc -> loc.commonNames.any { it.contains(name, ignoreCase = true) } }
         }
         fun <T: IdentityLocator>  List<T>.findById(id: String): T? {
             return find { it.identity == id }

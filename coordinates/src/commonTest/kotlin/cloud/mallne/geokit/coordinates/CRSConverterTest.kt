@@ -60,8 +60,9 @@ class CRSConverterTest {
             toEPSG = "EPSG:4326",
         ).execute().toDeg()
 
-        assertTrue(abs(geographic.latitude - 51.972311) < 0.00001, "Unexpected latitude: $geographic")
-        assertTrue(abs(geographic.longitude - 11.457106) < 0.00001, "Unexpected longitude: $geographic")
+        // Independent reference: PROJ 9.8.1, EPSG:25832 -> EPSG:4326 (E=668785.856, N=5760437.649).
+        assertTrue(abs(geographic.latitude - 51.96896257665452) < 0.00001, "Unexpected latitude: $geographic")
+        assertTrue(abs(geographic.longitude - 11.457105780660712) < 0.00001, "Unexpected longitude: $geographic")
     }
 
     @Test

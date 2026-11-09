@@ -2,6 +2,7 @@ package cloud.mallne.geokit.coordinates.model
 
 import cloud.mallne.geokit.coordinates.execution.CalculationExtensions.toDegrees
 import cloud.mallne.geokit.coordinates.execution.CalculationExtensions.toRadians
+import cloud.mallne.geokit.coordinates.tokens.ast.expression.AngleUnit
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.WKTUnit
 
 data class LocalCoordinate(
@@ -12,18 +13,16 @@ data class LocalCoordinate(
     override fun toDeg() = copy(
         latitude = latitude.toDegrees(),
         longitude = longitude.toDegrees(),
-        altitude = altitude?.toDegrees(),
     )
 
     override fun toRad() = copy(
         latitude = latitude.toRadians(),
         longitude = longitude.toRadians(),
-        altitude = altitude?.toRadians()
     )
 
     override fun autoConvert(thisUnit: WKTUnit) = copy(
         latitude = latitude * thisUnit.conversionFactor,
         longitude = longitude * thisUnit.conversionFactor,
-        altitude = altitude?.let { it * thisUnit.conversionFactor },
+        altitude = if (thisUnit is AngleUnit) altitude else altitude?.let { it * thisUnit.conversionFactor },
     )
 }

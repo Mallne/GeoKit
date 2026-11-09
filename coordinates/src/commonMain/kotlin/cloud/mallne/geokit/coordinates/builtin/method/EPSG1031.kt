@@ -11,7 +11,7 @@ import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractParameter
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.OperationParameter
 
 internal object EPSG1031 : ExecutionDispatchMethod {
-    override val commonNames: List<String> = listOf("Geocentric Translations (geog2D domain)")
+    override val commonNames: List<String> = listOf("Geocentric translations (geocentric domain)")
     override val identity: String = "EPSG:1031"
     override fun execute(
         coordinate: AbstractCoordinate,

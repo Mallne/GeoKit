@@ -20,8 +20,9 @@ class EPSG9807ConcurrencyTest {
                     } else {
                         LocalCoordinate(latitude = 5_760_437.649, longitude = 668_785.856)
                     }
-                    val expectedLatitude = if (useZone33) 51.065 else 51.972311
-                    val expectedLongitude = if (useZone33) 13.74 else 11.457106
+                    // Independent EPSG -> WGS84 references from PROJ 9.8.1.
+                    val expectedLatitude = if (useZone33) 51.06022233402966 else 51.96896257665452
+                    val expectedLongitude = if (useZone33) 13.748385225841215 else 11.457105780660712
                     val registry = CrsRegistry().apply {
                         ingest(BuiltInCoordinateReferenceSystems.EPSG4326)
                         ingest(BuiltInCoordinateReferenceSystems.EPSG25832)

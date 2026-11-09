@@ -5,12 +5,11 @@ import cloud.mallne.geokit.coordinates.execution.GeokitCoordinateConversionConte
 import cloud.mallne.geokit.coordinates.execution.MethodDispatcher
 import cloud.mallne.geokit.coordinates.model.AbstractCoordinate
 import cloud.mallne.geokit.coordinates.model.LocalCoordinate
-import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractOperationParameter
 import cloud.mallne.geokit.coordinates.tokens.ast.expression.AbstractParameter
 
 internal object EPSG9659 : ExecutionDispatchMethod {
     override val commonNames: List<String> =
-        listOf("Geographic 2D to Geographic 3D", "Geographic 3D to Geographic 2D", "Geographic 3D to 2D conversions")
+        listOf("Geographic3D to 2D conversion", "Geographic 2D to Geographic 3D", "Geographic 3D to Geographic 2D", "Geographic 3D to 2D conversions")
     override val identity: String = "EPSG:9659"
 
     /**
