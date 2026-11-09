@@ -59,7 +59,7 @@ data class CrsRegistry(
         }
         if (cached != null) {
             //Premature exit condition for cached Pipelines
-            return PipelineContainer(cached.first.from.getDatumUnit()?.let { source.autoConvert(it) } ?: source.toRad(),
+            return PipelineContainer(cached.first.from.normalizeInput(source),
                 cached.second)
         }
 
@@ -142,7 +142,7 @@ data class CrsRegistry(
         val mulPipeline = MultiPipeline(pipelines) { it }
         cachedPipelines[search] = mulPipeline
         return PipelineContainer(
-            data = search.from.getDatumUnit()?.let { source.autoConvert(it) } ?: source.toRad(),
+            data = search.from.normalizeInput(source),
             pipeline = mulPipeline
         )
     }

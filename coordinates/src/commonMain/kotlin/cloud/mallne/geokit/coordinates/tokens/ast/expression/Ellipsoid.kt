@@ -13,7 +13,8 @@ data class Ellipsoid(
     /**
      * The flattening (f) of the ellipsoid. f = 1 / (1/f)
      */
-    val flattening get() = 1 / inverseFlattening
+    // WKT encodes a sphere with inverse flattening zero (e.g. EPSG:7047).
+    val flattening get() = if (inverseFlattening == 0.0) 0.0 else 1.0 / inverseFlattening
     /**
      * The square of the first eccentricity (e^2).
      * Formula: e^2 = 2f - f^2

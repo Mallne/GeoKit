@@ -76,6 +76,23 @@ class EPSG9807Test {
     }
 
     @Test
+    fun sphericalTransverseMercatorMatchesAnalyticProjection() {
+        val radius = 6370997.0
+        val registry = registry(origin = 0.0, axis = radius, inverseFlattening = 0.0, centralMeridian = 0.0)
+        val input = LocalCoordinate(30.0, 20.0).toRad()
+        val expectedEasting = 400000.0 + 0.9996013 * radius *
+            kotlin.math.atanh(kotlin.math.cos(input.phi) * kotlin.math.sin(input.lambda))
+        val expectedNorthing = -100000.0 + 0.9996013 * radius *
+            kotlin.math.atan2(kotlin.math.tan(input.phi), kotlin.math.cos(input.lambda))
+        val projected = transform(registry, input)
+        assertEquals(expectedEasting, projected.easting, 1e-8)
+        assertEquals(expectedNorthing, projected.northing, 1e-8)
+        val restored = transform(registry, projected, reverse = true)
+        assertEquals(input.phi, restored.phi, 1e-12)
+        assertEquals(input.lambda, restored.lambda, 1e-12)
+    }
+
+    @Test
     fun exactPolesProjectIndependentlyOfLongitudeAndInvertToCentralMeridian() {
         for (origin in listOf(49.0, -90.0, 90.0)) {
             val registry = registry(origin)
@@ -223,12 +240,13 @@ class EPSG9807Test {
         axis: Double = 6377563.396,
         axisUnit: String = "LENGTHUNIT[\"metre\",1]",
         centralMeridian: Double = -2.0,
+        inverseFlattening: Double = 299.32496,
     ): CrsRegistry = CrsRegistry().apply {
         // Parameter names deliberately have no identifiers, testing EPSG name lookup.
         ingest(
             """PROJCRS["Airy Transverse Mercator",
                 BASEGEOGCRS["OSGB36",DATUM["Ordnance Survey of Great Britain 1936",
-                    ELLIPSOID["Airy 1830",$axis,299.32496,$axisUnit]],ID["EPSG",4277]],
+                    ELLIPSOID["Airy 1830",$axis,$inverseFlattening,$axisUnit]],ID["EPSG",4277]],
                 CONVERSION["British National Grid",METHOD["Transverse Mercator",ID["EPSG",9807]],
                     PARAMETER["Latitude of natural origin",$origin,ANGLEUNIT["degree",0.017453292519943295]],
                     PARAMETER["Longitude of natural origin",$centralMeridian,ANGLEUNIT["degree",0.017453292519943295]],

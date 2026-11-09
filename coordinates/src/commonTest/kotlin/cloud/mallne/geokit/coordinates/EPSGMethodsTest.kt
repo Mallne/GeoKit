@@ -169,6 +169,50 @@ class EPSGMethodsTest {
         }
     }
 
+    @Test
+    fun registryNormalizesPerAxisAnglesAndHeightIndependently() {
+        for (angularUnit in listOf(AngleUnit("radian", 1.0), AngleUnit("grad", PI / 200.0))) {
+            val source = geographic().copy(coordinateSystem = SpatialCS(
+                SpatialCSType.ELLIPSOIDAL, Dimension.D3,
+                spatialAxis = listOf(
+                    SpatialAxis("latitude", AxisDirection.NORTH(), unit = angularUnit),
+                    SpatialAxis("longitude", AxisDirection.EAST, unit = angularUnit),
+                    SpatialAxis("height", AxisDirection.UP, unit = LengthUnit("foot", 0.3048)),
+                ),
+            ))
+            val target = geocentric()
+            val registry = CrsRegistry().apply {
+                crs.addAll(listOf(source, target))
+                operations.add(conversion(source, target, "Geographic/geocentric conversions"))
+            }
+            val input = LocalCoordinate(53.80939444444444, 2.12955, 73.0).toRad()
+            repeat(2) {
+                val result = registry.compose(LocalCoordinate(
+                    input.phi / angularUnit.conversionFactor,
+                    input.lambda / angularUnit.conversionFactor,
+                    input.h!! / 0.3048,
+                ), "TEST:1", "TEST:2").execute()
+                assertCoordinate(LocalCoordinate(3771793.97, 140253.34, 5124304.35), result, 0.01)
+            }
+        }
+    }
+
+    @Test
+    fun sphericalGeographicGeocentricConversionMatchesAnalyticCoordinates() {
+        val sphere = Ellipsoid("GRS 1980 Authalic Sphere", 6370997.0, 0.0, metre)
+        val operation = conversion(geographic(sphere), geocentric(sphere), "Geographic/geocentric conversions")
+        val input = LocalCoordinate(30.0, 60.0, 123.0).toRad()
+        val radius = sphere.semiMajorAxis + input.h!!
+        val expected = LocalCoordinate(
+            radius * kotlin.math.sqrt(3.0) / 4.0,
+            radius * 3.0 / 4.0,
+            radius / 2.0,
+        )
+        val projected = transform(operation, input)
+        assertCoordinate(expected, projected, 1e-8)
+        assertCoordinate(input, transform(operation, projected, reverse = true), 1e-8)
+    }
+
     private fun geographic(
         ellipsoid: Ellipsoid = wgs84,
         dimension: Dimension = Dimension.D3,

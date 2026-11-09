@@ -214,8 +214,10 @@ ABRIDGEDTRANSFORMATION  : 'ABRIDGEDTRANSFORMATION';
 
 // Defines a valid WKT number:
 // [+-]? ([0-9]+ | [0-9]* '.' [0-9]+) ([Ee] [+-]? [0-9]+)?
-NUMBER : SIGN? ( DIGIT+ ( '.' DIGIT* )? | '.' DIGIT+ ) EXPONENT?;
+// Prefer INTEGER for unsigned whole numbers, including ORDER[1]. General
+// numeric parser rules accept either token; integer-only rules remain strict.
 INTEGER : DIGIT+;
+NUMBER : SIGN? ( DIGIT+ ( '.' DIGIT* )? | '.' DIGIT+ ) EXPONENT?;
 
 fragment SIGN : [+-];
 fragment DIGIT : [0-9];

@@ -703,6 +703,7 @@ quotedText
 
 number
     : NUMBER
+    | INTEGER
     ;
 
 literal
