@@ -10,6 +10,6 @@ enum class EPSGParameters(override val commonNames: List<String>, override val i
     Lambda_o(listOf("Longitude of natural origin"), "EPSG:8802"),
     K_o(listOf("Scale factor at natural origin"), "EPSG:8805"),
     FE(listOf("False easting"), "EPSG:8806"),
-    FN(listOf("Scale factor at natural origin"), "EPSG:8807"),
+    FN(listOf("False northing"), "EPSG:8807"),
     ;
 }
